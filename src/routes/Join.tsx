@@ -84,7 +84,7 @@ export default function Join() {
               <Input variant={"filled"} placeholder="이메일" />
             </InputGroup>
 
-            <Button type="submit" colorScheme="red" w="full">
+            <Button type="submit" colorScheme="customOrange" w="full">
               회원가입
             </Button>
           </VStack>

@@ -5,10 +5,12 @@ export default function Header() {
   return (
     <Stack
       paddingY={5}
-      paddingX={{
-        base: 10,
-        lg: 40,
-      }}
+      // paddingX={{
+      //   base: 10,
+      //   lg: 40,
+      // }}
+      maxW={"1712px"}
+      marginX={"auto"}
       alignItems={"center"}
       direction={{
         sm: "column",
@@ -18,7 +20,7 @@ export default function Header() {
         sm: 4,
         md: 0,
       }}
-      borderBottomWidth={1}
+      // borderBottomWidth={1}
       justifyContent={"space-between"}
     >
       <Link to={"/"}>
@@ -28,10 +30,10 @@ export default function Header() {
       </Link>
       <HStack alignItems={"center"}>
         <Link to={"/login"}>
-          <Button colorScheme={"teal"}>로그인</Button>
+          <Button colorScheme={"customOrange"} variant={"outline"}>로그인</Button>
         </Link>
         <Link to={"/join"}>
-          <Button colorScheme={"red"}>회원가입</Button>
+          <Button colorScheme={"customOrange"}>회원가입</Button>
         </Link>
       </HStack>
     </Stack>

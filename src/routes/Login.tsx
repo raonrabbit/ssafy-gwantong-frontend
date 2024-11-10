@@ -57,7 +57,7 @@ export default function Login() {
               />
             </InputGroup>
 
-            <Button type="submit" colorScheme="red" w="full">
+            <Button type="submit" colorScheme="customOrange" w="full">
               로그인
             </Button>
           </VStack>
