@@ -20,7 +20,6 @@ export default function Header() {
         sm: 4,
         md: 0,
       }}
-      // borderBottomWidth={1}
       justifyContent={"space-between"}
     >
       <Link to={"/"}>
@@ -30,10 +29,14 @@ export default function Header() {
       </Link>
       <HStack alignItems={"center"}>
         <Link to={"/login"}>
-          <Button colorScheme={"customOrange"} variant={"outline"}>로그인</Button>
+          <Button colorScheme={"customOrange"} variant={"outline"} borderRadius={"12px"}>
+            로그인
+          </Button>
         </Link>
         <Link to={"/join"}>
-          <Button colorScheme={"customOrange"}>회원가입</Button>
+          <Button colorScheme={"customOrange"} borderRadius={"12px"}>
+            회원가입
+          </Button>
         </Link>
       </HStack>
     </Stack>

@@ -1,5 +1,5 @@
 import { Box, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
-import { FaBuilding } from "react-icons/fa";
+import { MdOutlineApartment } from "react-icons/md";
 import { FiBookmark } from "react-icons/fi";
 
 type PropertyCardProps = {
@@ -29,25 +29,43 @@ export default function PropertyCard({
         <Image src={imageUrl} alt={title} objectFit={"cover"} />
       </Box>
       <Stack spacing={2} p={10} h={"303"}>
-        <HStack spacing={2}>
-          <FaBuilding />
-          <Text fontSize="sm">아파트</Text>
-          <Text fontSize="sm">매매</Text>
-          <Text fontSize="sm">48평</Text>
-          <FiBookmark />
+        <HStack justifyContent={"space-between"}>
+          <HStack spacing={2}>
+            <MdOutlineApartment fill="#1F1F1F" size={24} />
+            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+              <Text lineHeight={8} fontSize="sm">
+                아파트
+              </Text>
+            </Box>
+            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+              <Text lineHeight={8} fontSize="sm">
+                매매
+              </Text>
+            </Box>
+            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+              <Text lineHeight={8} fontSize="sm">
+                48평
+              </Text>
+            </Box>
+          </HStack>
+          <FiBookmark size={24} cursor={"pointer"} />
         </HStack>
-        <Heading as="h3" size="md">
-          {title}
-        </Heading>
-        <Text fontWeight="bold" fontSize="lg">
-          {price}
-        </Text>
-        <Text color="gray.500" fontSize="sm">
-          {details}
-        </Text>
-        <Text color="gray.500" fontSize="xs">
-          {location}
-        </Text>
+        <VStack justifyContent={"space-between"} align={"start"} h={"100%"}>
+          <VStack align={"start"} mt={3}>
+            <Text fontSize={"26px"} lineHeight={9}>
+              {title}
+            </Text>
+            <Text fontWeight="bold" fontSize={"17px"} lineHeight={9}>
+              {price}
+            </Text>
+            <Text fontWeight={"thin"} fontSize="sm" lineHeight={9}>
+              {details}
+            </Text>
+          </VStack>
+          <Text color="#666666" fontSize="xs">
+            {location}
+          </Text>
+        </VStack>
       </Stack>
     </Box>
   );

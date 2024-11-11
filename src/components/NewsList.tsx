@@ -1,6 +1,7 @@
 import { Box, Button, Grid, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
-import { FaNewspaper } from "react-icons/fa";
+import { IoIosMegaphone } from "react-icons/io";
 import { AiOutlineBulb } from "react-icons/ai";
+import { FaArrowCircleRight } from "react-icons/fa";
 
 type NewsCardProps = {
   imageUrl: string;
@@ -12,49 +13,49 @@ type NewsCardProps = {
 
 function NewsCard({ imageUrl, title, date, description, author }: NewsCardProps) {
   return (
-    <Box
+    <VStack
       maxW="sm"
       borderWidth="1px"
       borderRadius="24px"
       overflow="hidden"
       bg="white"
       boxShadow="md"
-      p={4}
+      maxWidth={"560px"}
+      gap={0}
     >
-      <Stack spacing={3}>
-        {/* Header with Icon, Title, and Date */}
-        <HStack spacing={2}>
-          <AiOutlineBulb color="orange" />
-          <Text fontSize="sm" fontWeight="bold">
-            보도자료
+      <VStack p={10} align={"start"} h={"375px"} justifyContent={"space-between"}>
+        <Box>
+          <HStack spacing={2}>
+            <IoIosMegaphone size={"46px"} color="#F3B021" />
+            <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+              <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
+                보도자료
+              </Text>
+            </Box>
+            <Text fontSize="sm" color="#333333">
+              {date}
+            </Text>
+          </HStack>
+
+          <Text pt={5} fontSize={"30px"} fontWeight="bold" lineHeight={1.4}>
+            {title}
           </Text>
-          <Text fontSize="sm" color="gray.500">
-            {date}
+        </Box>
+        <Box>
+          <Text fontSize="sm" color="gray.700">
+            {description}
           </Text>
-        </HStack>
-
-        {/* News Title */}
-        <Heading as="h3" size="md" fontWeight="bold">
-          {title}
-        </Heading>
-
-        {/* Description */}
-        <Text fontSize="sm" color="gray.700">
-          {description}
-        </Text>
-
-        {/* Author and Image */}
-        <Text fontSize="xs" color="gray.500" fontStyle="italic">
-          ✒️ {author}
-        </Text>
-        <Image src={imageUrl} alt={title} borderRadius="lg" />
-      </Stack>
-    </Box>
+          <Text fontSize="xs" color="gray.500" fontStyle="italic">
+            ✒️ {author}
+          </Text>
+        </Box>
+      </VStack>
+      <Image w={"100%"} maxH={"314px"} src={imageUrl} alt={title} />
+    </VStack>
   );
 }
 
-export default function NewsSection() {
-  // Array of news data
+export default function NewsList() {
   const newsData: NewsCardProps[] = [
     {
       imageUrl: "/images/news1.png",
@@ -77,29 +78,25 @@ export default function NewsSection() {
       description: "모두 다 함께 그에게 힘내라고 외쳐주세요!",
       author: "한중우 라이브로 군복무 중",
     },
-    // Add more news data as needed
   ];
 
   return (
-    <VStack
-      maxWidth={"1712px"}
-      mt={48}
-      spacing={8}
-      align="stretch"
-      bg="gray.100"
-      p={8}
-      marginX={"auto"}
-    >
-      {/* Section Header */}
-      <HStack spacing={2} alignItems="center">
-        <FaNewspaper color="orange" />
+    <VStack maxWidth={"1712px"} mt={48} gap={4} align="stretch" bg="gray.100" marginX={"auto"}>
+      <HStack alignItems="center">
+        <Image height={"78px"} src="/images/News.webp"></Image>
         <Heading as="h1" size="lg">
           오늘의 뉴스
         </Heading>
       </HStack>
 
-      {/* News Card Grid */}
-      <Grid templateColumns="repeat(auto-fill, minmax(300px, 1fr))" gap={6} w="full">
+      <Grid
+        templateColumns={{
+          sm: "1fr",
+          md: "1fr 1fr",
+          lg: "repeat(3, 1fr)",
+        }}
+        gap={4}
+      >
         {newsData.map((news, index) => (
           <NewsCard
             key={index}
@@ -112,36 +109,91 @@ export default function NewsSection() {
         ))}
       </Grid>
 
-      {/* Footer Section with Additional News */}
-      <VStack spacing={4} align="stretch" p={4}>
-        <Box bg="white" borderRadius="md" p={4} boxShadow="sm">
-          <HStack spacing={2}>
-            <AiOutlineBulb color="orange" />
-            <Text fontSize="sm" fontWeight="bold">
-              보도자료
+      <VStack align="stretch">
+        <Grid
+          templateColumns={{
+            sm: "1fr",
+            lg: "1fr 1fr",
+          }}
+          gap={4}
+        >
+          <Box bg="white" borderRadius="24px" boxShadow="sm" p={9}>
+            <HStack spacing={2}>
+              <IoIosMegaphone size={"46px"} color="#F3B021" />
+              <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+                <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
+                  보도자료
+                </Text>
+              </Box>
+              <Text fontSize="sm" color="#333333">
+                2024.11.04
+              </Text>
+            </HStack>
+            <Text fontSize="26px" mt={3}>
+              최준혁, 알고리즘 푸는데 인상 찌푸리며 고통을 받고 있다는 사실 알고 계셨나요? 준혁도지
+              화이팅!
             </Text>
-            <Text fontSize="sm" color="gray.500">
-              2024.11.04
+          </Box>
+          <Box bg="white" borderRadius="24px" boxShadow="sm" p={9}>
+            <HStack spacing={2}>
+              <IoIosMegaphone size={"46px"} color="#F3B021" />
+              <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+                <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
+                  보도자료
+                </Text>
+              </Box>
+              <Text fontSize="sm" color="#333333">
+                2024.11.04
+              </Text>
+            </HStack>
+            <Text fontSize="26px" mt={3}>
+              최준혁, 알고리즘 푸는데 인상 찌푸리며 고통을 받고 있다는 사실 알고 계셨나요? 준혁도지
+              화이팅!
             </Text>
-          </HStack>
-          <Text fontSize="sm" color="gray.700" mt={2}>
-            최준혁, 알고리즘 푸는데 인상 찌푸리며 고통을 받고 있다는 사실 알고 계셨나요? 준혁도지
-            화이팅!
-          </Text>
-        </Box>
+          </Box>
+        </Grid>
 
-        {/* Footer Buttons */}
-        <HStack spacing={4} justifyContent="center" pt={4}>
-          <Button variant="outline" colorScheme="orange">
-            전체뉴스
-          </Button>
-          <Button variant="outline" colorScheme="orange">
-            아파트뉴스
-          </Button>
-          <Button variant="outline" colorScheme="orange">
-            참고자료
-          </Button>
-        </HStack>
+        <Grid
+          templateColumns={{
+            sm: "1fr",
+            lg: "repeat(3, 1fr)",
+          }}
+          gap={4}
+        >
+          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+            <Box>
+              <Text lineHeight={"38px"} fontSize={"26px"}>
+                전체뉴스
+              </Text>
+            </Box>
+            <HStack>
+              <Text fontSize={"17px"}>바로가기</Text>
+              <FaArrowCircleRight fill="#F37021" size={24} />
+            </HStack>
+          </HStack>
+          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+            <Box>
+              <Text lineHeight={"38px"} fontSize={"26px"}>
+                아파트뉴스
+              </Text>
+            </Box>
+            <HStack>
+              <Text fontSize={"17px"}>바로가기</Text>
+              <FaArrowCircleRight fill="#F37021" size={24} />
+            </HStack>
+          </HStack>
+          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+            <Box>
+              <Text lineHeight={"38px"} fontSize={"26px"}>
+                참고자료
+              </Text>
+            </Box>
+            <HStack>
+              <Text fontSize={"17px"}>바로가기</Text>
+              <FaArrowCircleRight fill="#F37021" size={24} />
+            </HStack>
+          </HStack>
+        </Grid>
       </VStack>
     </VStack>
   );

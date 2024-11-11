@@ -72,8 +72,8 @@ export default function PropertyList() {
   return (
     <VStack spacing={8} align="stretch" maxW={"1712px"} marginX={"auto"} marginTop={48}>
       <VStack align="flex-start" spacing={2}>
-        <HStack>
-          <Image src={"images/fire.svg"}></Image>
+        <HStack gap={0}>
+          <Image src={"images/Fire.webp"} h={"78px"}></Image>
           <Heading as="h1" size="xl" fontWeight="bold">
             핫한 매물
           </Heading>
