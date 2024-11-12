@@ -1,7 +1,7 @@
-import { Box, Button, Grid, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, Grid, Heading, HStack, Image, VStack } from "@chakra-ui/react";
 import { IoIosMegaphone } from "react-icons/io";
-import { AiOutlineBulb } from "react-icons/ai";
 import { FaArrowCircleRight } from "react-icons/fa";
+import NewsCard from "./NewsCard";
 
 type NewsCardProps = {
   imageUrl: string;
@@ -10,50 +10,6 @@ type NewsCardProps = {
   description: string;
   author: string;
 };
-
-function NewsCard({ imageUrl, title, date, description, author }: NewsCardProps) {
-  return (
-    <VStack
-      maxW="sm"
-      borderWidth="1px"
-      borderRadius="24px"
-      overflow="hidden"
-      bg="white"
-      boxShadow="md"
-      maxWidth={"560px"}
-      gap={0}
-    >
-      <VStack p={10} align={"start"} h={"375px"} justifyContent={"space-between"}>
-        <Box>
-          <HStack spacing={2}>
-            <IoIosMegaphone size={"46px"} color="#F3B021" />
-            <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
-              <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
-                보도자료
-              </Text>
-            </Box>
-            <Text fontSize="sm" color="#333333">
-              {date}
-            </Text>
-          </HStack>
-
-          <Text pt={5} fontSize={"30px"} fontWeight="bold" lineHeight={1.4}>
-            {title}
-          </Text>
-        </Box>
-        <Box>
-          <Text fontSize="sm" color="gray.700">
-            {description}
-          </Text>
-          <Text fontSize="xs" color="gray.500" fontStyle="italic">
-            ✒️ {author}
-          </Text>
-        </Box>
-      </VStack>
-      <Image w={"100%"} maxH={"314px"} src={imageUrl} alt={title} />
-    </VStack>
-  );
-}
 
 export default function NewsList() {
   const newsData: NewsCardProps[] = [
@@ -81,7 +37,7 @@ export default function NewsList() {
   ];
 
   return (
-    <VStack maxWidth={"1712px"} mt={48} gap={4} align="stretch" bg="gray.100" marginX={"auto"}>
+    <VStack maxWidth={"1712px"} mt={48} gap={20} align="stretch" bg="gray.100" marginX={"auto"}>
       <HStack alignItems="center">
         <Image height={"78px"} src="/images/News.webp"></Image>
         <Heading as="h1" size="lg">
