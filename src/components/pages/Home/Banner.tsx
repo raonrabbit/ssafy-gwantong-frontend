@@ -9,6 +9,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { FaArrowCircleRight } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Banner() {
   const { colorMode } = useColorMode();
@@ -32,18 +33,20 @@ export default function Banner() {
           bg={goMapBox}
           borderBottomLeftRadius={"24px"}
         >
-          <Stack
-            flexDirection={"row"}
-            justifyContent="center"
-            alignItems="center"
-            h={"100%"}
-            marginY={"auto"}
-          >
-            <Text fontSize="16px" fontWeight="bold" display="flex" alignItems="center">
-              지도 보러 가기
-            </Text>
-            <FaArrowCircleRight size={24} cursor={"pointer"} />
-          </Stack>
+          <Link to={"/map"}>
+            <Stack
+              flexDirection={"row"}
+              justifyContent="center"
+              alignItems="center"
+              h={"100%"}
+              marginY={"auto"}
+            >
+              <Text fontSize="16px" fontWeight="bold" display="flex" alignItems="center">
+                지도 보러 가기
+              </Text>
+              <FaArrowCircleRight size={24} cursor={"pointer"} />
+            </Stack>
+          </Link>
         </Box>
         <Box right={"178px"} top={"-2px"} position={"absolute"} w={"38px"} h={"38px"}>
           <Image src={polygonImageSrc}></Image>

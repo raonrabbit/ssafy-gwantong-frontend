@@ -1,4 +1,14 @@
-import { Button, Grid, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Grid,
+  Heading,
+  HStack,
+  Image,
+  Stack,
+  Text,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import PropertyCard from "./PropertyCard";
 
 type PropertyCardProps = {
@@ -10,6 +20,7 @@ type PropertyCardProps = {
 };
 
 export default function PropertyList() {
+  const buttonColor = useColorModeValue("#1F1F1F", "gray.600");
   const properties: PropertyCardProps[] = [
     {
       imageUrl: "/images/property1.png",
@@ -103,7 +114,14 @@ export default function PropertyList() {
         ))}
       </Grid>
 
-      <Button variant="solid" colorScheme="blackAlpha" size="lg" mx="auto">
+      <Button
+        borderRadius={24}
+        backgroundColor={buttonColor}
+        size="lg"
+        mx="auto"
+        color={"white"}
+        w={"200px"}
+      >
         더보기
       </Button>
     </VStack>

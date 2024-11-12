@@ -5,6 +5,7 @@ import Users from "./routes/Users";
 import NotFound from "./routes/NotFound";
 import Login from "./routes/Login";
 import Join from "./routes/Join";
+import MapPage from "./routes/MapPage";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "join",
         element: <Join />,
+      },
+      {
+        path: "map",
+        element: <MapPage />,
       },
     ],
   },
