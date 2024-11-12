@@ -1,4 +1,13 @@
-import { Box, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  HStack,
+  Image,
+  Stack,
+  Text,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { MdOutlineApartment } from "react-icons/md";
 import { FiBookmark } from "react-icons/fi";
 
@@ -17,8 +26,10 @@ export default function PropertyCard({
   details,
   location,
 }: PropertyCardProps) {
+  const cardBox = useColorModeValue("white", "gray.700");
+  const cardTagContent = useColorModeValue("#F7FAFC", "gray.500");
   return (
-    <Box maxW="sm" borderWidth="1px" borderRadius="24px" bg="white" boxShadow="md" maxWidth={"416"}>
+    <Box borderRadius="24px" bg={cardBox} boxShadow="md" maxWidth={"416"}>
       <Box
         position={"relative"}
         overflow={"hidden"}
@@ -32,17 +43,17 @@ export default function PropertyCard({
         <HStack justifyContent={"space-between"}>
           <HStack spacing={2}>
             <MdOutlineApartment fill="#1F1F1F" size={24} />
-            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+            <Box w={"62px"} bg={cardTagContent} textAlign={"center"} borderRadius={24}>
               <Text lineHeight={8} fontSize="sm">
                 아파트
               </Text>
             </Box>
-            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+            <Box w={"62px"} bg={cardTagContent} textAlign={"center"} borderRadius={24}>
               <Text lineHeight={8} fontSize="sm">
                 매매
               </Text>
             </Box>
-            <Box w={"62px"} bg={"#F7FAFC"} textAlign={"center"} borderRadius={24}>
+            <Box w={"62px"} bg={cardTagContent} textAlign={"center"} borderRadius={24}>
               <Text lineHeight={8} fontSize="sm">
                 48평
               </Text>

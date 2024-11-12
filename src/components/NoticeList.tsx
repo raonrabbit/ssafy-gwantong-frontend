@@ -1,44 +1,13 @@
 import { Box, Grid, Heading, HStack, Stack, Text, VStack, Image } from "@chakra-ui/react";
 import { FaRegClipboard } from "react-icons/fa";
 import { IoIosPaper } from "react-icons/io";
+import NoticeCard from "./NoticeCard";
 
 type NoticeCardProps = {
   title: string;
   date: string;
   content: string;
 };
-
-function NoticeCard({ title, date, content }: NoticeCardProps) {
-  return (
-    <Box
-      borderWidth="1px"
-      borderRadius="16px"
-      bg="white"
-      boxShadow="md"
-      p={10}
-      maxW="848px"
-      w="full"
-    >
-      <Stack spacing={3}>
-        <HStack spacing={2}>
-          <FaRegClipboard size={"46px"} />
-          <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
-            <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
-              공지사항
-            </Text>
-          </Box>
-          <Text fontSize="sm" color="#333333">
-            {date}
-          </Text>
-        </HStack>
-
-        <Text fontSize={26} lineHeight={"76px"}>
-          {content}
-        </Text>
-      </Stack>
-    </Box>
-  );
-}
 
 export default function NoticeList() {
   const notices: NoticeCardProps[] = [
@@ -65,16 +34,8 @@ export default function NoticeList() {
   ];
 
   return (
-    <VStack
-      maxW={"1712px"}
-      marginX={"auto"}
-      spacing={20}
-      align="stretch"
-      bg="gray.100"
-      mt={48}
-      pb={48}
-    >
-      <HStack spacing={2} alignItems="center">
+    <VStack maxW={"1712px"} marginX={"auto"} align="stretch" mt={48} pb={48} gap={0}>
+      <HStack alignItems="center">
         <Image src={"images/Gongji.webp"} h={"78px"} />
         <Heading as="h1" size="lg">
           공지사항
@@ -86,6 +47,7 @@ export default function NoticeList() {
           sm: "1fr",
           md: "1fr 1fr",
         }}
+        mt={10}
         gap={4}
         w="full"
         mx="auto"

@@ -1,23 +1,34 @@
-import { extendTheme, ThemeConfig } from "@chakra-ui/react";
+import { background, extendTheme, type ThemeConfig } from "@chakra-ui/react";
 
 const colors = {
   customOrange: {
-    500: "#F37021",  // 기본 색상
-    600: "#D95E1D",  // hover 시 색상
+    500: "#F37021", // 기본 색상
+    600: "#D95E1D", // hover 시 색상
+    700: "#C14F1B", // dark mode 기본 색상
+    800: "#A34219", // dark mode hover 시 색상
   },
 };
 
 const components = {
   Button: {
     variants: {
-      outline: {
-        borderColor: "customOrange.500",
-        color: "customOrange.500",
+      outline: (props: any) => ({
+        borderColor: props.colorMode === "dark" ? "customOrange.700" : "customOrange.500",
+        color: props.colorMode === "dark" ? "customOrange.700" : "customOrange.500",
         _hover: {
-          bg: "customOrange.500",
+          bg: props.colorMode === "dark" ? "customOrange.800" : "customOrange.500",
           color: "white",
         },
-      },
+      }),
+      primary: (props: any) => ({
+        background: props.colorMode === "dark" ? "customOrange.700" : "customOrange.500",
+        borderColor: props.colorMode === "dark" ? "customOrange.700" : "customOrange.500",
+        color: props.colorMode === "dark" ? "white" : "white",
+        _hover: {
+          bg: props.colorMode === "dark" ? "customOrange.800" : "customOrange.600",
+          color: "white",
+        },
+      }),
     },
   },
 };
@@ -27,14 +38,16 @@ const config: ThemeConfig = {
   useSystemColorMode: false,
 };
 
-
 const fonts = {
   body: "Pretendard, sans-serif",
   heading: "Pretendard, sans-serif",
-}
+};
 
 const theme = extendTheme({
-  fonts, colors, config, components
+  fonts,
+  colors,
+  config,
+  components,
 });
 
 export default theme;

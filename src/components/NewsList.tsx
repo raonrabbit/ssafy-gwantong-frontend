@@ -1,4 +1,13 @@
-import { Box, Text, Grid, Heading, HStack, Image, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Grid,
+  Heading,
+  HStack,
+  Image,
+  VStack,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { IoIosMegaphone } from "react-icons/io";
 import { FaArrowCircleRight } from "react-icons/fa";
 import NewsCard from "./NewsCard";
@@ -12,6 +21,9 @@ type NewsCardProps = {
 };
 
 export default function NewsList() {
+  const cardBox = useColorModeValue("white", "gray.700");
+  const cardTagContent = useColorModeValue("#F7FAFC", "gray.500");
+  const cardDateContent = useColorModeValue("#333333", "gray.400");
   const newsData: NewsCardProps[] = [
     {
       imageUrl: "/images/news1.png",
@@ -37,7 +49,7 @@ export default function NewsList() {
   ];
 
   return (
-    <VStack maxWidth={"1712px"} mt={48} gap={20} align="stretch" bg="gray.100" marginX={"auto"}>
+    <VStack maxWidth={"1712px"} gap={0} mt={48} align="stretch" marginX={"auto"}>
       <HStack alignItems="center">
         <Image height={"78px"} src="/images/News.webp"></Image>
         <Heading as="h1" size="lg">
@@ -51,6 +63,7 @@ export default function NewsList() {
           md: "1fr 1fr",
           lg: "repeat(3, 1fr)",
         }}
+        mt={10}
         gap={4}
       >
         {newsData.map((news, index) => (
@@ -65,7 +78,7 @@ export default function NewsList() {
         ))}
       </Grid>
 
-      <VStack align="stretch">
+      <VStack align="stretch" mt={4} gap={0}>
         <Grid
           templateColumns={{
             sm: "1fr",
@@ -73,15 +86,15 @@ export default function NewsList() {
           }}
           gap={4}
         >
-          <Box bg="white" borderRadius="24px" boxShadow="sm" p={9}>
+          <Box bg={cardBox} borderRadius="24px" boxShadow="sm" p={9}>
             <HStack spacing={2}>
               <IoIosMegaphone size={"46px"} color="#F3B021" />
-              <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+              <Box bg={cardTagContent} w={"98px"} textAlign={"center"} borderRadius={24}>
                 <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
                   보도자료
                 </Text>
               </Box>
-              <Text fontSize="sm" color="#333333">
+              <Text fontSize="sm" color={cardDateContent}>
                 2024.11.04
               </Text>
             </HStack>
@@ -90,15 +103,15 @@ export default function NewsList() {
               화이팅!
             </Text>
           </Box>
-          <Box bg="white" borderRadius="24px" boxShadow="sm" p={9}>
+          <Box bg={cardBox} borderRadius="24px" boxShadow="sm" p={9}>
             <HStack spacing={2}>
               <IoIosMegaphone size={"46px"} color="#F3B021" />
-              <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+              <Box bg={cardTagContent} w={"98px"} textAlign={"center"} borderRadius={24}>
                 <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
                   보도자료
                 </Text>
               </Box>
-              <Text fontSize="sm" color="#333333">
+              <Text fontSize="sm" color={cardDateContent}>
                 2024.11.04
               </Text>
             </HStack>
@@ -114,9 +127,10 @@ export default function NewsList() {
             sm: "1fr",
             lg: "repeat(3, 1fr)",
           }}
+          mt={4}
           gap={4}
         >
-          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+          <HStack justifyContent={"space-between"} p={9} bg={cardBox} borderRadius={24}>
             <Box>
               <Text lineHeight={"38px"} fontSize={"26px"}>
                 전체뉴스
@@ -127,7 +141,7 @@ export default function NewsList() {
               <FaArrowCircleRight fill="#F37021" size={24} />
             </HStack>
           </HStack>
-          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+          <HStack justifyContent={"space-between"} p={9} bg={cardBox} borderRadius={24}>
             <Box>
               <Text lineHeight={"38px"} fontSize={"26px"}>
                 아파트뉴스
@@ -138,7 +152,7 @@ export default function NewsList() {
               <FaArrowCircleRight fill="#F37021" size={24} />
             </HStack>
           </HStack>
-          <HStack justifyContent={"space-between"} p={9} bg={"white"} borderRadius={24}>
+          <HStack justifyContent={"space-between"} p={9} bg={cardBox} borderRadius={24}>
             <Box>
               <Text lineHeight={"38px"} fontSize={"26px"}>
                 참고자료

@@ -1,4 +1,4 @@
-import { Box, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Image, Text, VStack, useColorModeValue } from "@chakra-ui/react";
 import { IoIosMegaphone } from "react-icons/io";
 
 type NewsCardProps = {
@@ -10,13 +10,15 @@ type NewsCardProps = {
 };
 
 export default function NewsCard({ imageUrl, title, date, description, author }: NewsCardProps) {
+  const cardBox = useColorModeValue("white", "gray.700");
+  const cardTagContent = useColorModeValue("#F7FAFC", "gray.500");
+  const cardDateContent = useColorModeValue("#333333", "gray.400");
   return (
     <VStack
       maxW="sm"
-      borderWidth="1px"
       borderRadius="24px"
       overflow="hidden"
-      bg="white"
+      bg={cardBox}
       boxShadow="md"
       maxWidth={"560px"}
       gap={0}
@@ -25,12 +27,12 @@ export default function NewsCard({ imageUrl, title, date, description, author }:
         <Box>
           <HStack spacing={2}>
             <IoIosMegaphone size={"46px"} color="#F3B021" />
-            <Box bg={"#F7FAFC"} w={"98px"} textAlign={"center"} borderRadius={24}>
+            <Box bg={cardTagContent} w={"98px"} textAlign={"center"} borderRadius={24}>
               <Text fontSize="sm" fontWeight={"normal"} lineHeight={"46px"}>
                 보도자료
               </Text>
             </Box>
-            <Text fontSize="sm" color="#333333">
+            <Text fontSize="sm" color={cardDateContent}>
               {date}
             </Text>
           </HStack>
