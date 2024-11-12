@@ -9,21 +9,12 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { FaEnvelope, FaLock, FaUserNinja, FaUserSecret } from "react-icons/fa";
-import SocialLogin from "../components/SocialLogin";
+import SocialLogin from "../components/pages/commons/SocialLogin";
 
 export default function Join() {
   return (
     <Stack w={"100vw"} h={"100vh"} bg={"gray.100"} pt={"32"}>
-      <Box
-        w="full"
-        maxW="md"
-        mx="auto"
-        mt={10}
-        p={6}
-        borderRadius="md"
-        boxShadow="lg"
-        bg="white"
-      >
+      <Box w="full" maxW="md" mx="auto" mt={10} p={6} borderRadius="md" boxShadow="lg" bg="white">
         <Text fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
           회원가입
         </Text>
@@ -54,12 +45,7 @@ export default function Join() {
                   </Box>
                 }
               />
-              <Input
-                variant={"filled"}
-                placeholder="비밀번호"
-                type="password"
-                autoComplete="off"
-              />
+              <Input variant={"filled"} placeholder="비밀번호" type="password" autoComplete="off" />
             </InputGroup>
 
             <InputGroup>

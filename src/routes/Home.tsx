@@ -1,8 +1,8 @@
 import { Box, HStack, Image, Stack, Text, VStack, useColorModeValue } from "@chakra-ui/react";
-import PropertyList from "../components/PropertyList";
-import NewsList from "../components/NewsList";
-import Banner from "../components/Banner";
-import NoticeList from "../components/NoticeList";
+import PropertyList from "../components/pages/Home/PropertyList";
+import NewsList from "../components/pages/Home/NewsList";
+import Banner from "../components/pages/Home/Banner";
+import NoticeList from "../components/pages/Home/NoticeList";
 
 export default function Home() {
   const backgroundColor = useColorModeValue("gray.100", "gray.800");
