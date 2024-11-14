@@ -7,7 +7,7 @@ import NoticeList from "../components/pages/Home/NoticeList";
 export default function Home() {
   const backgroundColor = useColorModeValue("gray.100", "gray.800");
   return (
-    <Box bg={backgroundColor}>
+    <Box bg={backgroundColor} paddingTop="88px">
       <Banner></Banner>
       <PropertyList></PropertyList>
       <NewsList></NewsList>
