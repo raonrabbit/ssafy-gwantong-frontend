@@ -8,6 +8,7 @@ import {
   Text,
   VStack,
   useToast,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { FaEnvelope, FaLock, FaUserNinja, FaCheckCircle } from "react-icons/fa";
 import { useState } from "react";
@@ -28,6 +29,8 @@ export default function Join() {
   const [isNicknameValid, setIsNicknameValid] = useState<boolean | null>(null);
 
   const toast = useToast();
+  const backgroundColor = useColorModeValue("gray.100", "gray.800");
+  const loginBoxColor = useColorModeValue("white", "gray.700");
 
   // 이메일 유효성 검사
   const validateEmail = (email: string) => {
@@ -169,8 +172,17 @@ export default function Join() {
   };
 
   return (
-    <Stack w={"100vw"} h={"100vh"} bg={"gray.100"} pt={"80"}>
-      <Box w="full" maxW="md" mx="auto" mt={10} p={6} borderRadius="md" boxShadow="lg" bg="white">
+    <Stack w={"100vw"} h={"100vh"} bg={backgroundColor} pt={"80"}>
+      <Box
+        w="full"
+        maxW="md"
+        mx="auto"
+        mt={10}
+        p={6}
+        borderRadius="md"
+        boxShadow="lg"
+        bg={loginBoxColor}
+      >
         <Text fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
           회원가입
         </Text>
@@ -190,10 +202,10 @@ export default function Join() {
                 placeholder="이메일"
                 value={email}
                 onChange={handleEmailChange}
-                borderColor={
-                  isEmailValid === null ? "gray.300" : isEmailValid ? "blue.400" : "red.400"
-                }
+                border="none" // 초기 상태에서는 테두리 없음
+                // 마우스 오버 시 테두리
                 _focus={{
+                  border: "2px solid", // 포커스 시 테두리
                   borderColor:
                     isEmailValid === null ? "gray.300" : isEmailValid ? "blue.500" : "red.500",
                 }}
@@ -225,10 +237,9 @@ export default function Join() {
                   placeholder="인증번호 입력"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  borderColor={
-                    isCodeVerified === null ? "gray.300" : isCodeVerified ? "blue.400" : "red.400"
-                  }
+                  border="none"
                   _focus={{
+                    border: "2px solid",
                     borderColor:
                       isCodeVerified === null
                         ? "gray.300"
@@ -258,10 +269,9 @@ export default function Join() {
                 type="password"
                 value={password}
                 onChange={handlePasswordChange}
-                borderColor={
-                  isPasswordValid === null ? "gray.300" : isPasswordValid ? "blue.400" : "red.400"
-                }
+                border="none"
                 _focus={{
+                  border: "2px solid",
                   borderColor:
                     isPasswordValid === null
                       ? "gray.300"
@@ -287,10 +297,9 @@ export default function Join() {
                 type="password"
                 value={confirmPassword}
                 onChange={handleConfirmPasswordChange}
-                borderColor={
-                  isPasswordMatch === null ? "gray.300" : isPasswordMatch ? "blue.400" : "red.400"
-                }
+                border="none"
                 _focus={{
+                  border: "2px solid",
                   borderColor:
                     isPasswordMatch === null
                       ? "gray.300"
@@ -315,10 +324,9 @@ export default function Join() {
                 placeholder="닉네임 (2글자 이상)"
                 value={nickname}
                 onChange={handleNicknameChange}
-                borderColor={
-                  isNicknameValid === null ? "gray.300" : isNicknameValid ? "blue.400" : "red.400"
-                }
+                border="none"
                 _focus={{
+                  border: "2px solid",
                   borderColor:
                     isNicknameValid === null
                       ? "gray.300"
@@ -329,7 +337,13 @@ export default function Join() {
               />
             </InputGroup>
 
-            <Button type="submit" colorScheme="customOrange" w="full" isDisabled={!isCodeVerified}>
+            <Button
+              type="submit"
+              colorScheme="customOrange"
+              w="full"
+              variant={"primary"}
+              isDisabled={!isCodeVerified}
+            >
               회원가입
             </Button>
           </VStack>
