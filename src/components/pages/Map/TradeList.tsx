@@ -17,7 +17,7 @@ import React from "react";
 const TradeList: React.FC = () => {
   return (
     <TableContainer>
-      <Table variant="simple" size={"sm"}>
+      <Table variant="simple" w={"358px"} size={"sm"}>
         <TableCaption>Imperial to metric conversion factors</TableCaption>
         <Thead>
           <Tr>
@@ -32,7 +32,7 @@ const TradeList: React.FC = () => {
             <Td>71C</Td>
             <Td colSpan={2}>
               <VStack display="flex" align={"end"}>
-                <Text>21억 1200</Text>
+                <Text fontWeight={"bold"}>21억 1200</Text>
                 <Text>13층</Text>
               </VStack>
             </Td>
@@ -42,7 +42,7 @@ const TradeList: React.FC = () => {
             <Td>71C</Td>
             <Td colSpan={2}>
               <VStack display="flex" align={"end"}>
-                <Text>21억 1200</Text>
+                <Text fontWeight={"bold"}>21억 1200</Text>
                 <Text>13층</Text>
               </VStack>
             </Td>
@@ -52,7 +52,7 @@ const TradeList: React.FC = () => {
             <Td>71C</Td>
             <Td colSpan={2}>
               <VStack display="flex" align={"end"}>
-                <Text>21억 1200</Text>
+                <Text fontWeight={"bold"}>21억 1200</Text>
                 <Text>13층</Text>
               </VStack>
             </Td>
@@ -62,7 +62,7 @@ const TradeList: React.FC = () => {
             <Td>71C</Td>
             <Td colSpan={2}>
               <VStack display="flex" align={"end"}>
-                <Text>21억 1200</Text>
+                <Text fontWeight={"bold"}>21억 1200</Text>
                 <Text>13층</Text>
               </VStack>
             </Td>
