@@ -9,9 +9,9 @@ export interface LoginApiResponse {
   data?: {
     token: string; // JWT 토큰
     user?: {
-      // id: string;
       email: string;
       nickname: string;
+      avatarUrl: string;
     };
   };
   error?: string;

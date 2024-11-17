@@ -8,12 +8,21 @@ import {
   useColorMode,
   useColorModeValue,
   useBreakpointValue,
+  Avatar,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks"; // Redux Hooks
+import { logout } from "../../../redux/slices/authSlice"; // Redux logout action
 
 export default function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
+  const user = useAppSelector((state) => state.auth.user); // Redux 상태에서 사용자 정보 가져오기
+  const dispatch = useAppDispatch();
   const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
   const logoSymbolSrc = "/images/symbol.svg";
   const responsiveLogoSrc = useBreakpointValue({
@@ -22,6 +31,16 @@ export default function Header() {
   });
   const Icon = useColorModeValue(FaMoon, FaSun);
   const headerColor = useColorModeValue("rgba(255, 255, 255, 0.7)", "rgba(26, 32, 44, 0.7)");
+
+  const handleLogout = () => {
+    // localStorage에서 토큰 및 사용자 정보 제거
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Redux 상태 초기화
+    dispatch(logout());
+  };
+
   return (
     <Box
       bgColor={headerColor}
@@ -35,10 +54,6 @@ export default function Header() {
     >
       <Stack
         paddingY={5}
-        // paddingX={{
-        //   base: 10,
-        //   lg: 40,
-        // }}
         maxW={"1712px"}
         marginX={"auto"}
         alignItems={"center"}
@@ -64,16 +79,29 @@ export default function Header() {
             aria-label="Toggle Dark Mode"
             icon={<Icon />}
           />
-          <Link to={"/login"}>
-            <Button colorScheme={"customOrange"} variant={"outline"} borderRadius={"12px"}>
-              로그인
-            </Button>
-          </Link>
-          <Link to={"/join"}>
-            <Button colorScheme={"customOrange"} variant={"primary"} borderRadius={"12px"}>
-              회원가입
-            </Button>
-          </Link>
+          {user ? ( // Redux 상태에서 user가 존재하면 Avatar와 로그아웃 메뉴를 표시
+            <Menu>
+              <MenuButton>
+                <Avatar name={user.nickname} src={user.avatarUrl || undefined} cursor="pointer" />
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
+              </MenuList>
+            </Menu>
+          ) : (
+            <>
+              <Link to={"/login"}>
+                <Button colorScheme={"customOrange"} variant={"outline"} borderRadius={"12px"}>
+                  로그인
+                </Button>
+              </Link>
+              <Link to={"/join"}>
+                <Button colorScheme={"customOrange"} variant={"primary"} borderRadius={"12px"}>
+                  회원가입
+                </Button>
+              </Link>
+            </>
+          )}
         </HStack>
       </Stack>
     </Box>

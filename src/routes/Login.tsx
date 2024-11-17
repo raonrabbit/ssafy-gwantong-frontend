@@ -13,7 +13,9 @@ import {
 import { FaLock, FaUserNinja } from "react-icons/fa";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/auth"; // auth.ts의 login 함수 import
+import { useAppDispatch } from "../redux/hooks"; // Redux Dispatch Hook
+import { login as loginAction } from "../redux/slices/authSlice"; // Redux Slice Action
+import { login as loginApi } from "../api/auth"; // API 호출 함수
 import { LoginApiResponse } from "../types/api";
 import SocialLogin from "../components/pages/commons/SocialLogin";
 
@@ -25,12 +27,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch(); // Redux Dispatch Hook 사용
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response: LoginApiResponse = await login(email, password);
+      const response: LoginApiResponse = await loginApi(email, password); // API 호출
       if (response.success && response.data) {
         toast({
           title: "로그인 성공",
@@ -39,7 +42,21 @@ export default function Login() {
           duration: 3000,
           isClosable: true,
         });
-        localStorage.setItem("token", response.data.token); // JWT 토큰 저장
+
+        // JWT 토큰과 사용자 정보를 localStorage에 저장
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // Redux 상태 업데이트
+        if (response.data.user) {
+          dispatch(
+            loginAction({
+              user: response.data.user,
+              token: response.data.token,
+            })
+          );
+        }
+        // 로그인 후 리다이렉트
         navigate("/");
       } else {
         toast({
@@ -62,6 +79,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   return (
     <Stack w={"100vw"} h={"100vh"} bg={backgroundColor} pt={"80"}>
       <Box
