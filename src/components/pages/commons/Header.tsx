@@ -15,7 +15,7 @@ import {
   MenuItem,
 } from "@chakra-ui/react";
 import { FaMoon, FaSun } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks"; // Redux Hooks
 import { logout } from "../../../redux/slices/authSlice"; // Redux logout action
 
@@ -23,6 +23,7 @@ export default function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useAppSelector((state) => state.auth.user); // Redux 상태에서 사용자 정보 가져오기
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
   const logoSymbolSrc = "/images/symbol.svg";
   const responsiveLogoSrc = useBreakpointValue({
@@ -39,6 +40,10 @@ export default function Header() {
 
     // Redux 상태 초기화
     dispatch(logout());
+  };
+
+  const navigateToMyPage = () => {
+    navigate("/mypage");
   };
 
   return (
@@ -85,6 +90,7 @@ export default function Header() {
                 <Avatar name={user.nickname} src={user.avatarUrl || undefined} cursor="pointer" />
               </MenuButton>
               <MenuList>
+                <MenuItem onClick={navigateToMyPage}>마이페이지</MenuItem>
                 <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
               </MenuList>
             </Menu>

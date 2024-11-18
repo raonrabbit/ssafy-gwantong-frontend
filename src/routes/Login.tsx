@@ -81,7 +81,7 @@ export default function Login() {
   };
 
   return (
-    <Stack w={"100vw"} h={"100vh"} bg={backgroundColor} pt={"80"}>
+    <Stack w={"100vw"} h={"100vh"} bg={backgroundColor} pt={"40"}>
       <Box
         w="full"
         maxW="md"

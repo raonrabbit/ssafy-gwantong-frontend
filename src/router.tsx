@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 import Root from "./components/Root";
 import Home from "./routes/Home";
-import Users from "./routes/Users";
 import NotFound from "./routes/NotFound";
 import Login from "./routes/Login";
 import Join from "./routes/Join";
 import MapPage from "./routes/MapPage";
+import MyPage from "./routes/MyPage";
 
 const router = createBrowserRouter([
   {
@@ -18,8 +18,8 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "users",
-        element: <Users />,
+        path: "mypage",
+        element: <MyPage />,
       },
       {
         path: "login",
