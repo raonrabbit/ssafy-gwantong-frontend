@@ -87,7 +87,11 @@ export default function Header() {
           {user ? ( // Redux 상태에서 user가 존재하면 Avatar와 로그아웃 메뉴를 표시
             <Menu>
               <MenuButton>
-                <Avatar name={user.nickname} src={user.avatarUrl || undefined} cursor="pointer" />
+                <Avatar
+                  name={user.nickname}
+                  src={user.profileImage || undefined}
+                  cursor="pointer"
+                />
               </MenuButton>
               <MenuList>
                 <MenuItem onClick={navigateToMyPage}>마이페이지</MenuItem>

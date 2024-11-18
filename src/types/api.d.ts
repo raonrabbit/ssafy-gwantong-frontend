@@ -11,7 +11,7 @@ export interface LoginApiResponse {
     user?: {
       email: string;
       nickname: string;
-      avatarUrl: string;
+      profileImage: string;
     };
   };
   error?: string;

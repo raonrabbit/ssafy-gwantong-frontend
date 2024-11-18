@@ -37,7 +37,7 @@ export const login = async (email: string, password: string): Promise<LoginApiRe
       user: {
         email: email,
         nickname: "이재백",
-        avatarUrl: "https://~~",
+        profileImage: "https://~~",
       },
     },
   };
