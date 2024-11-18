@@ -7,6 +7,15 @@ const colors = {
     700: "#C14F1B", // dark mode 기본 색상
     800: "#A34219", // dark mode hover 시 색상
   },
+  black: "#1F1F1F", // 기본 black 색상 변경
+};
+
+const styles = {
+  global: {
+    ":root": {
+      "--chakra-colors-chakra-body-text": "#1F1F1F",
+    },
+  },
 };
 
 const components = {
@@ -48,6 +57,7 @@ const theme = extendTheme({
   colors,
   config,
   components,
+  styles,
 });
 
 export default theme;
