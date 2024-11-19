@@ -6,6 +6,7 @@ import Login from "./routes/Login";
 import Join from "./routes/Join";
 import MapPage from "./routes/MapPage";
 import MyPage from "./routes/MyPage";
+import BookmarkPage from "./routes/BookmarkPage";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "map",
         element: <MapPage />,
+      },
+      {
+        path: "bookmark",
+        element: <BookmarkPage />,
       },
     ],
   },

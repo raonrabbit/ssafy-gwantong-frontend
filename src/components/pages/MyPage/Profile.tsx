@@ -1,59 +1,120 @@
-import { Avatar, Box, Input, Text, VStack, useDisclosure, chakra, Image } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Input,
+  Text,
+  VStack,
+  useDisclosure,
+  chakra,
+  Image,
+  Button,
+} from "@chakra-ui/react";
 import React, { useRef, useState } from "react";
-import { FaPen } from "react-icons/fa";
+import { FaPen, FaCheck } from "react-icons/fa";
+import { FaX } from "react-icons/fa6";
 import { useAppSelector } from "../../../redux/hooks";
-import { motion } from "framer-motion";
 
-const MotionBox = chakra(motion.div);
+interface EditableFieldProps {
+  value: string | undefined;
+  onSave: (newValue: string) => void;
+  placeholder: string;
+  editableWidth: string;
+}
+
+const EditableField: React.FC<EditableFieldProps> = ({
+  value,
+  onSave,
+  placeholder,
+  editableWidth,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentValue, setCurrentValue] = useState(value || "");
+  const [slideLeft, setSlideLeft] = useState(false);
+
+  const handleEdit = () => {
+    setSlideLeft(true);
+    setTimeout(() => setIsEditing(true), 300);
+  };
+
+  const handleSave = () => {
+    setIsEditing(false);
+    setSlideLeft(false);
+    onSave(currentValue);
+  };
+
+  return (
+    <Box
+      position="relative"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      borderBottom="1px solid #CCCCCC"
+      borderRadius="0"
+      width={editableWidth}
+      height="40px"
+      onClick={!isEditing ? handleEdit : undefined}
+      style={{ cursor: !isEditing ? "pointer" : "default" }}
+    >
+      <Box
+        display="flex"
+        position="relative"
+        height="100%"
+        alignItems="center"
+        justifyContent="center"
+        style={{
+          width: "fit-content",
+          color: "black",
+          transition: "all 0.3s ease",
+          position: "absolute",
+          left: slideLeft ? 0 : "50%",
+          transform: slideLeft ? "translateX(0)" : "translateX(-50%)",
+        }}
+      >
+        {!isEditing ? (
+          currentValue || placeholder
+        ) : (
+          <Input
+            value={currentValue}
+            onChange={(e) => setCurrentValue(e.target.value)}
+            onBlur={handleSave}
+            position="absolute"
+            left="0px"
+            top="0px"
+            height="100%"
+            width="380px"
+            border="none"
+            outline="none"
+            pl="0px"
+            autoFocus
+            focusBorderColor="transparent"
+            style={{
+              transition: "all 0.3s ease",
+            }}
+          />
+        )}
+      </Box>
+      <FaPen
+        style={{
+          position: "absolute",
+          right: "10px",
+        }}
+      />
+    </Box>
+  );
+};
 
 export default function Profile() {
   // Get user Info
   const user = useAppSelector((state) => state.auth.user);
 
-  // Profile Image
-  const [profileImage, setImage] = useState(null);
-  const fileInput = useRef(null);
-
-  // Modal
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const initialRef = React.useRef(null);
-  const finalRef = React.useRef(null);
-
-  // Nickname Change
-  const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.nickname);
-  const [slideLeft, setSlideLeft] = useState(false); // 슬라이드 애니메이션 상태
-
-  const handleEdit = () => {
-    setSlideLeft(true); // 왼쪽으로 슬라이드 시작
-    setTimeout(() => setIsEditing(true), 300); // 애니메이션 완료 후 Input으로 전환
-  };
-
-  const handleSave = () => {
-    setIsEditing(false);
-    setSlideLeft(false); // 오른쪽으로 슬라이드 시작
-    //setTimeout(() => setIsEditing(false), 300); // 애니메이션 완료 후 보기 모드로 전환
-  };
-
-  // Email change
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [email, setEmail] = useState(user?.email);
-  const [slideLeftEmail, setSlideLeftEmail] = useState(false);
-
-  const handleEditEmail = () => {
-    setSlideLeftEmail(true);
-    setTimeout(() => setIsEditingEmail(true), 300);
-  };
-
-  const handleSaveEmail = () => {
-    setIsEditingEmail(false);
-    setSlideLeftEmail(false);
-  };
+  const [newPassword, setPassword] = useState("");
 
   return (
     <Box alignItems={"center"}>
-      <VStack spacing={15}>
-        <VStack display="flex" justifyContent="center">
+      <VStack spacing="40px">
+        <Box display="flex" justifyContent="center">
           <Box>
             {user ? (
               <Avatar
@@ -66,86 +127,40 @@ export default function Profile() {
               <Avatar name={"X"} cursor="pointer" />
             )}
           </Box>
+        </Box>
+
+        <Box
+          bg="white"
+          width="700px"
+          height="340px"
+          boxShadow="0px 4px 24px #0000001E"
+          borderRadius="24px"
+        >
           <Box
-            position="relative"
             display="flex"
-            justifyContent="center"
+            justifyContent="space-between"
+            width="100%"
             alignItems="center"
-            borderBottom="1px solid #CCCCCC"
-            borderRadius="0"
-            width="245px"
-            height="40px"
-            onClick={!isEditing ? handleEdit : undefined} // 클릭 시 편집 시작
-            style={{ cursor: !isEditing ? "pointer" : "default" }}
+            borderBottom="2px solid #DDDDDD"
           >
-            {/* 이름 또는 입력창 */}
-            <Box
-              display="flex"
-              position="relative" // 부모 기준 위치 설정
-              height="100%"
-              alignItems="center"
-              justifyContent="center"
-              style={{
-                width: "fit-content", // 콘텐츠 크기에 따라 너비 설정
-                color: "black",
-                transition: "all 0.3s ease", // 애니메이션 효과
-                position: "absolute", // 부모 기준으로 위치 조정
-                left: slideLeft ? 0 : "50%", // 부모의 왼쪽 끝 또는 중앙으로 이동
-                transform: slideLeft ? "translateX(0)" : "translateX(-50%)", // 중앙 정렬 보정
-              }}
-            >
-              {!isEditing ? (
-                name || user ? (
-                  user?.nickname
-                ) : (
-                  "이름을 입력해주세요."
-                )
-              ) : (
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)} // 이름 업데이트
-                  onBlur={handleSave} // 포커스를 잃으면 저장
-                  position="absolute"
-                  left="0px"
-                  top="0px"
-                  height="100%"
-                  width="180px"
-                  border="none"
-                  outline="none"
-                  pl="0px"
-                  autoFocus // 입력창 자동 포커스
-                  focusBorderColor="transparent"
-                  style={{
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              )}
+            <Box display="flex" alignItems="center">
+              <Image
+                src="/images/user_info.webp"
+                width="32px"
+                height="32px"
+                m="16px"
+                mr="12px"
+                style={{
+                  filter: "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.2))",
+                }}
+              />
+              <Text fontSize="16px" fontWeight="bold">
+                회원 정보
+              </Text>
             </Box>
-
-            {/* 펜 아이콘 */}
-            <FaPen
-              style={{
-                position: "absolute",
-                transform: "translateY(-50%)",
-                top: "50%",
-                right: "10px",
-              }}
-            />
-          </Box>
-        </VStack>
-
-        <Box width="700px" height="380px" boxShadow="0px 4px 24px #0000001E" borderRadius="24px">
-          <Box display="flex" width="100%" alignItems="center" borderBottom="2px solid #DDDDDD">
-            <Image
-              src="/images/user_info.webp"
-              width="32px"
-              height="32px"
-              m="16px"
-              mr="12px"
-            ></Image>
-            <Text fontSize="16px" fontWeight="bold">
-              회원 정보
-            </Text>
+            <Button mr="16px" colorScheme={"customOrange"} borderRadius={"24px"}>
+              수정
+            </Button>
           </Box>
           <VStack
             display="flex"
@@ -162,77 +177,19 @@ export default function Profile() {
                 height="40px"
                 alignItems="center"
               >
-                <Text fontSize="20px">이메일</Text>
+                <Text fontSize="18px">닉네임</Text>
               </Box>
-              <Box
-                position="relative"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                borderBottom="1px solid #CCCCCC"
-                borderRadius="0"
-                width="450px"
-                height="40px"
-                ml="20px"
-                onClick={!isEditingEmail ? handleEditEmail : undefined} // 클릭 시 편집 시작
-                style={{ cursor: !isEditingEmail ? "pointer" : "default" }}
-              >
-                {/* 이름 또는 입력창 */}
-                <Box
-                  display="flex"
-                  position="relative" // 부모 기준 위치 설정
-                  height="100%"
-                  alignItems="center"
-                  justifyContent="center"
-                  style={{
-                    width: "fit-content", // 콘텐츠 크기에 따라 너비 설정
-                    color: "black",
-                    transition: "all 0.3s ease", // 애니메이션 효과
-                    position: "absolute", // 부모 기준으로 위치 조정
-                    left: slideLeftEmail ? 0 : "50%", // 부모의 왼쪽 끝 또는 중앙으로 이동
-                    transform: slideLeftEmail ? "translateX(0)" : "translateX(-50%)", // 중앙 정렬 보정
-                  }}
-                >
-                  {!isEditingEmail ? (
-                    email || user ? (
-                      user?.email
-                    ) : (
-                      "이메일을 입력해주세요."
-                    )
-                  ) : (
-                    <Input
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)} // 이름 업데이트
-                      onBlur={handleSaveEmail} // 포커스를 잃으면 저장
-                      position="absolute"
-                      left="0px"
-                      top="0px"
-                      height="100%"
-                      width="380px"
-                      border="none"
-                      outline="none"
-                      pl="0px"
-                      autoFocus // 입력창 자동 포커스
-                      focusBorderColor="transparent"
-                      style={{
-                        transition: "all 0.3s ease",
-                      }}
-                    />
-                  )}
-                </Box>
-
-                {/* 펜 아이콘 */}
-                <FaPen
-                  style={{
-                    position: "absolute",
-                    transform: "translateY(-50%)",
-                    top: "50%",
-                    right: "10px",
-                  }}
+              <Box display="flex" width="75%" justifyContent="center">
+                {/* 닉네임 변경 */}
+                <EditableField
+                  value={name}
+                  onSave={setName}
+                  placeholder="닉네임을 입력해주세요."
+                  editableWidth="400px"
                 />
               </Box>
             </Box>
-            <Box width="100%">
+            <Box width="100%" display="flex">
               <Box
                 display="flex"
                 width="25%"
@@ -240,10 +197,19 @@ export default function Profile() {
                 height="40px"
                 alignItems="center"
               >
-                <Text fontSize="20px">비밀번호</Text>
+                <Text fontSize="18px">이메일</Text>
+              </Box>
+              <Box display="flex" width="75%" justifyContent="center">
+                {/* 이메일 변경 */}
+                <EditableField
+                  value={email}
+                  onSave={setEmail}
+                  placeholder="이메일을 입력해주세요."
+                  editableWidth="400px"
+                />
               </Box>
             </Box>
-            <Box width="100%">
+            <Box width="100%" display="flex">
               <Box
                 display="flex"
                 width="25%"
@@ -251,9 +217,19 @@ export default function Profile() {
                 height="40px"
                 alignItems="center"
               >
-                <Text fontSize="20px">비밀번호 확인</Text>
+                <Text fontSize="18px">비밀번호</Text>
+              </Box>
+              <Box display="flex" width="75%" justifyContent="center">
+                {/* 비밀번호 변경 */}
+                <EditableField
+                  value={newPassword}
+                  onSave={setPassword}
+                  placeholder="****"
+                  editableWidth="400px"
+                />
               </Box>
             </Box>
+            <Box>{/* 비밀번호 확인 코드 여기 작성*/}</Box>
           </VStack>
         </Box>
       </VStack>
