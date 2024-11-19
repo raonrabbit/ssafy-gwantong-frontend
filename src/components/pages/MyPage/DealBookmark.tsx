@@ -80,14 +80,14 @@ export default function DealBookmark() {
         </Box>
 
         {/* Grid Section */}
-        <Box p={4}>
+        <Box p={4} display="flex" justifyContent="center">
           <Grid
             templateColumns={{
-              base: "repeat(3, 1fr)",
+              base: "repeat(2, 1fr)",
             }}
             gap={8}
           >
-            {properties.slice(0, 3).map((property, index) => (
+            {properties.slice(0, 2).map((property, index) => (
               <DealCard
                 key={index}
                 imageUrl={property.imageUrl}
