@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer, { restoreSession } from "./slices/authSlice";
+import searchReducer from "./slices/searchSlice";
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     auth: authReducer,
+    search: searchReducer,
   },
 });
 
@@ -22,3 +24,4 @@ if (token && user) {
     })
   );
 }
+export default store;

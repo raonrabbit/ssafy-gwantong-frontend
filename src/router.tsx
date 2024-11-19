@@ -6,6 +6,9 @@ import Login from "./routes/Login";
 import Join from "./routes/Join";
 import MapPage from "./routes/MapPage";
 import MyPage from "./routes/MyPage";
+import MapSearchPage from "./routes/MapSearchPage";
+import MapResultPage from "./routes/MapResultPage";
+import KakaoCallback from "./components/pages/Login/KakaoCallback";
 
 const router = createBrowserRouter([
   {
@@ -26,12 +29,26 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
+        path: "/login/oauth2/code/kakao",
+        element: <KakaoCallback />,
+      },
+      {
         path: "join",
         element: <Join />,
       },
       {
         path: "map",
         element: <MapPage />,
+        children: [
+          {
+            path: "search",
+            element: <MapSearchPage />,
+          },
+          {
+            path: "apt/:id",
+            element: <MapResultPage />,
+          },
+        ],
       },
     ],
   },

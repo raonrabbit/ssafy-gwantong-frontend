@@ -1,12 +1,21 @@
 import { useState } from "react";
-import { Box, Button, VStack, useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Input,
+  InputGroup,
+  InputRightAddon,
+  VStack,
+  useToast,
+} from "@chakra-ui/react";
 import { Map, CustomOverlayMap, MapMarker } from "react-kakao-maps-sdk";
 import { MdMyLocation } from "react-icons/md";
 import positionsData from "./MapPosition.json";
 import dongData from "./dong.json";
 import sigunguData from "./sigungu.json";
-
-import MapResult from "./MapResult";
+import sidoData from "./sido.json";
+import { FaSearch } from "react-icons/fa";
 
 interface BoundPosition {
   lat: number;
@@ -19,39 +28,21 @@ interface Bound {
 }
 
 export default function MapComponent() {
+  const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleSearch = () => {
+    if (searchValue.trim() !== "") {
+      navigate(`/map/search?query=${encodeURIComponent(searchValue)}`);
+    }
+  };
+
   const toast = useToast(); // Toast 훅 초기화
-  // const positions = [
-  //   {
-  //     lat: 37.5236077,
-  //     lng: 127.0572148,
-  //     content: "청담자이",
-  //     minPrice: "22억",
-  //     maxPrice: "40.2억",
-  //     isMaxPrice: false,
-  //     isMinPrice: false,
-  //   },
-  //   {
-  //     lat: 37.5248352,
-  //     lng: 127.0552715,
-  //     content: "마크힐스청담1차",
-  //     minPrice: "66.8억",
-  //     maxPrice: "104.7억",
-  //     isMaxPrice: true,
-  //     isMinPrice: false,
-  //   },
-  //   {
-  //     lat: 37.5247718,
-  //     lng: 127.0561392,
-  //     content: "청담래미안로이뷰",
-  //     minPrice: "27.7억",
-  //     maxPrice: "27.7억",
-  //     isMaxPrice: false,
-  //     isMinPrice: true,
-  //   },
-  // ];
+
   const positions = positionsData.filtered;
   const dongs = dongData.seoul;
   const sigungus = sigunguData.seoul;
+  const sidos = sidoData.sido;
   const [bounds, setBounds] = useState<Bound | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(3); // 초기 줌 레벨 설정
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null); // 지도 인스턴스 저장
@@ -68,12 +59,6 @@ export default function MapComponent() {
     });
 
     setZoomLevel(map.getLevel()); // 줌 레벨 업데이트
-    // toast({
-    //   title: `줌 레벨: ${map.getLevel()}`,
-    //   status: "info",
-    //   duration: 3000,
-    //   isClosable: true,
-    // });
   };
 
   const handleZoomIn = () => {
@@ -189,6 +174,21 @@ export default function MapComponent() {
       })
     : sigungus;
 
+  const filteredSidos = bounds
+    ? sidos.filter(({ lat, lng }) => {
+        if (lat && lng) {
+          return (
+            bounds &&
+            lat >= bounds.sw.lat &&
+            lat <= bounds.ne.lat &&
+            lng >= bounds.sw.lng &&
+            lng <= bounds.ne.lng
+          );
+        }
+        return false;
+      })
+    : sidos;
+
   const convertToBillion = (value: any) => {
     if (value) {
       return (value / 10000).toFixed(1) + "억"; // 10000으로 나누고 소수점 1자리로 표시
@@ -252,7 +252,6 @@ export default function MapComponent() {
               </Box>
             </CustomOverlayMap>
           ))}
-
         {/* zoomLevel 4이상 필터링된 마커 */}
         {zoomLevel >= 4 &&
           zoomLevel <= 5 &&
@@ -275,9 +274,9 @@ export default function MapComponent() {
               </VStack>
             </CustomOverlayMap>
           ))}
-
         {/* zoomLevel 6이상 필터링된 마커 */}
         {zoomLevel >= 6 &&
+          zoomLevel <= 9 &&
           filteredSigungus.map(({ lat, lng, sigungu }: any) => (
             <CustomOverlayMap key={`sigungu-${sigungu}`} position={{ lat, lng }}>
               <VStack
@@ -291,6 +290,28 @@ export default function MapComponent() {
                 spacing={0}
               >
                 <Box fontSize={"11px"}>{sigungu}</Box>
+                <Box fontSize={"12px"} fontWeight={"bold"}>
+                  25억
+                </Box>
+              </VStack>
+            </CustomOverlayMap>
+          ))}
+
+        {/* zoomLevel 10이상 필터링된 마커 */}
+        {zoomLevel >= 10 &&
+          filteredSidos.map(({ lat, lng, sido }: any) => (
+            <CustomOverlayMap key={`sido-${sido}`} position={{ lat, lng }}>
+              <VStack
+                w={"85px"}
+                h={"53px"}
+                backgroundImage={"/images/local_up2.png"}
+                textAlign={"center"}
+                color={"white"}
+                lineHeight={1.2}
+                justifyContent={"center"}
+                spacing={0}
+              >
+                <Box fontSize={"11px"}>{sido}</Box>
                 <Box fontSize={"12px"} fontWeight={"bold"}>
                   25억
                 </Box>
@@ -335,8 +356,7 @@ export default function MapComponent() {
         </Button>
       </Box>
 
-      {/* 검색 박스 */}
-      {/* <Box
+      <Box
         position={"absolute"}
         left={"10px"}
         top={"10px"}
@@ -347,21 +367,25 @@ export default function MapComponent() {
         zIndex={1}
       >
         <InputGroup>
-          <Input placeholder="아파트, 지역 검색" borderRadius={24} borderColor={"#F37021"} />
+          <Input
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="아파트, 지역 검색"
+            borderRadius={24}
+            borderColor={"#F37021"}
+          />
           <InputRightAddon
             bg={"#F37021"}
             borderTopEndRadius={24}
             borderBottomEndRadius={24}
             borderColor={"#F37021"}
             px={3}
+            onClick={handleSearch}
           >
             <FaSearch size={16} color="#FFFFFF" />
           </InputRightAddon>
         </InputGroup>
-      </Box> */}
-
-      {/* <MapSearch /> */}
-      <MapResult />
+      </Box>
     </div>
   );
 }

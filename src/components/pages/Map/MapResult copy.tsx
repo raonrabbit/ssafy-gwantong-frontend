@@ -1,3 +1,6 @@
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../src/redux/store";
+import { setSearchValue } from "../../../../src/redux/slices/searchSlice";
 import {
   Box,
   Input,
@@ -21,27 +24,19 @@ import TradeChart from "./TradeChart";
 import TradeList from "./TradeList";
 import { useState } from "react";
 
-interface MapResultProps {
-  apartmentId: string;
-}
+export default function MapResult() {
+  const dispatch = useDispatch();
+  const searchValue = useSelector((state: RootState) => state.search.searchValue); // Redux 상태값 가져오기
 
-const apartmentDetails: Record<string, { name: string; details: string }> = {
-  "1": { name: "청담자이", details: "708세대 2011년 10월 입주" },
-  "2": { name: "청담힐", details: "30세대 1997년 4월 입주" },
-  "3": { name: "청담르엘", details: "1,261세대 2025년 11월 입주" },
-};
-
-export default function MapResult({ apartmentId }: MapResultProps) {
-  const apartment = apartmentDetails[apartmentId];
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSearchValue(e.target.value)); // Redux 상태 업데이트
+  };
 
   const [isOn, setIsOn] = useState(true);
 
   const handleToggle = () => {
     setIsOn(!isOn);
   };
-  if (!apartment) {
-    return <Text>아파트 정보를 찾을 수 없습니다.</Text>;
-  }
 
   return (
     <Box
@@ -78,8 +73,8 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           borderRadius={24}
           borderColor={"#F37021"}
           bg={"white"}
-          value={apartment.name}
-          readOnly
+          value={searchValue}
+          onChange={handleInputChange} // 입력값 변경 시 Redux 상태 업데이트
         />
         <InputRightAddon
           bg={"#F37021"}
@@ -99,7 +94,7 @@ export default function MapResult({ apartmentId }: MapResultProps) {
         </HStack>
         <Box>
           <Text fontSize={"18px"} lineHeight={"32px"} color={"white"}>
-            {apartment.name}
+            청담자이
           </Text>
         </Box>
         <HStack w={"52px"} justifyContent={"center"}></HStack>
@@ -113,6 +108,28 @@ export default function MapResult({ apartmentId }: MapResultProps) {
       </HStack>
 
       <HStack h={"40px"} bg={"#F37021"} gap={0}>
+        <Menu>
+          <MenuButton
+            colorScheme={"customOrange"}
+            as={Button}
+            rightIcon={<IoIosArrowDown size={24} color="white" />}
+            bg="#F37021"
+            color="white"
+            borderRadius={0}
+            minW={"119px"}
+            borderRight={"1px solid #FF9C60"}
+          >
+            매매
+          </MenuButton>
+          <MenuList minWidth="110px" bg="#F37021" color="white" border="none">
+            <MenuItem bg={"#F37021"} _hover={{ bg: "#C14F1B" }}>
+              매매
+            </MenuItem>
+            <MenuItem bg={"#F37021"} _hover={{ bg: "#C14F1B" }}>
+              전/월세
+            </MenuItem>
+          </MenuList>
+        </Menu>
         <Menu>
           <MenuButton
             colorScheme={"customOrange"}
