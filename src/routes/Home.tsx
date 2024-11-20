@@ -10,9 +10,6 @@ export default function Home() {
   console.log(localStorage.getItem("token"));
   axios
     .get("http://localhost:8080/api/v1/user/profile", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`, // 인증 토큰 추가
-      },
       withCredentials: true,
     })
     .then((response) => {

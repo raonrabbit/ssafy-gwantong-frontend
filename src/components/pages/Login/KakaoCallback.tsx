@@ -10,7 +10,7 @@ export default function KakaoCallback() {
     // URL에서 code 파라미터 추출
     const query = new URLSearchParams(window.location.search);
     const code = query.get("code");
-    console.log(code);
+    // console.log(code);
 
     const localAxios = () => {
       const instance = axios.create({
@@ -26,10 +26,10 @@ export default function KakaoCallback() {
     if (code) {
       API.post("/api/v1/auth/login/kakao", { code })
         .then((response: any) => {
-          console.log("로그인 성공:", response.data);
+          const accessToken = response.data.accessToken;
           // JWT 저장 (예: localStorage)
-          // axios.defaults.headers.common["Authorization"] = `Bearer ${response.data?.accessToken}`;
-          localStorage.setItem("token", response.data?.accessToken);
+          axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+          // localStorage.setItem("token", response.data?.accessToken);
           // 로그인 성공 후 홈으로 이동
           navigate("/");
         })

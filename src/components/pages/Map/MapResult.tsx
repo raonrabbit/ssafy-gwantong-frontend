@@ -19,8 +19,7 @@ import { MdArrowBack, MdArrowDropDown } from "react-icons/md";
 import { IoIosArrowDown } from "react-icons/io";
 import TradeChart from "./TradeChart";
 import TradeList from "./TradeList";
-import { useState, useEffect } from "react";
-import { Roadview } from "react-kakao-maps-sdk";
+import { useState, useEffect, useRef } from "react";
 
 interface MapResultProps {
   apartmentId: string;
@@ -52,32 +51,34 @@ const apartmentDetails: Record<
 
 export default function MapResult({ apartmentId }: MapResultProps) {
   const apartment = apartmentDetails[apartmentId];
-  const [panoId, setPanoId] = useState<number | null>(null);
+  const roadviewRef = useRef<HTMLDivElement>(null);
   const [isOn, setIsOn] = useState(true);
 
   const handleToggle = () => {
     setIsOn(!isOn);
   };
+  useEffect(() => {
+    if (!roadviewRef.current) return;
 
-  // useEffect(() => {
-  //   if (apartment) {
-  //     const roadviewClient = new window.kakao.maps.RoadviewClient();
-  //     const position = new window.kakao.maps.LatLng(apartment.lat, apartment.lng);
-  //     console.log("position:", position);
-  //     console.log("roadviewClient:", roadviewClient);
-  //     roadviewClient.getNearestPanoId(position, 50, (nearestPanoId) => {
-  //       setPanoId(nearestPanoId);
-  //     });
-  //   }
-  // }, [apartment]);
+    const roadview = new window.kakao.maps.Roadview(roadviewRef.current);
+    const roadviewClient = new window.kakao.maps.RoadviewClient();
+    const markerPosition = new window.kakao.maps.LatLng(apartment.lat, apartment.lng);
+
+    // 로드뷰 설정 및 마커 추가
+    roadviewClient.getNearestPanoId(markerPosition, 100, (panoId) => {
+      roadview.setPanoId(panoId, markerPosition);
+
+      // 마커 추가
+      const marker = new window.kakao.maps.Marker({
+        position: markerPosition,
+      });
+      marker.setMap(roadview); // 마커를 로드뷰에 추가
+    });
+  }, [apartment]);
 
   if (!apartment) {
     return <Text>아파트 정보를 찾을 수 없습니다.</Text>;
   }
-
-  // if (!panoId) {
-  //   return <Text>이 위치에서 로드뷰를 찾을 수 없습니다.</Text>;
-  // }
 
   return (
     <Box
@@ -88,24 +89,8 @@ export default function MapResult({ apartmentId }: MapResultProps) {
       height={"calc(100vh - 88px)"}
       bg={"gray.100"}
       zIndex={1}
-      overflowY={"auto"}
-      sx={{
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#FF9C60",
-          borderRadius: "10px",
-        },
-        "&::-webkit-scrollbar-track": {
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
-          borderRadius: "10px",
-        },
-        "&": {
-          msOverflowStyle: "none",
-          scrollbarWidth: "thin",
-        },
-      }}
+      overflow={"auto"}
+      className="no-scrollbar"
     >
       {/* 검색 Input */}
       <InputGroup p={"10px"}>
@@ -139,13 +124,6 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           </Text>
         </Box>
         <HStack w={"52px"} justifyContent={"center"}></HStack>
-      </HStack>
-
-      {/* 매물 정보 */}
-      <HStack justifyContent={"center"} bg={"#F37021"} borderBottom={"1px solid #FF9C60"}>
-        <Text fontSize={"14px"} lineHeight={"27px"} color={"#533B0C"}>
-          서울특별시 강남구 청담동 134-38
-        </Text>
       </HStack>
 
       <HStack h={"40px"} bg={"#F37021"} gap={0}>
@@ -264,21 +242,18 @@ export default function MapResult({ apartmentId }: MapResultProps) {
             </MenuList>
           </Menu>
         </HStack>
-        <Roadview
-          position={{
-            // 지도의 중심좌표
-            lat: apartment.lat,
-            lng: apartment.lng,
-            radius: 100,
-          }}
-          // panoId={panoId || undefined} // panoId가 설정되면 사용
-          style={{
-            // 지도의 크기
-            width: "100%",
-            height: "300px",
-            marginTop: "10px",
-          }}
-        />
+      </VStack>
+      {/* 로드뷰 표시 */}
+      <Box
+        ref={roadviewRef}
+        style={{
+          width: "100%",
+          height: "300px",
+        }}
+      ></Box>
+
+      {/* 거래 내역 */}
+      <VStack py={5} mt={"5px"} bg={"white"} gap={0}>
         <HStack justifyContent={"space-between"} minW={"358px"} px={5} mt={4}>
           <VStack justifyContent={"space-between"} align={"start"}>
             <Text color={"#FF9C60"} fontSize={"15px"} lineHeight={"17px"}>

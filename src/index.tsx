@@ -7,6 +7,7 @@ import store from "./redux/store";
 import router from "./router";
 import "pretendard/dist/web/static/pretendard.css";
 import theme from "./theme";
+import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
