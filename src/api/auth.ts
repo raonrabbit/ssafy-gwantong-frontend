@@ -26,7 +26,6 @@ export const kakaoLogin = async (code: string) => {
     // });
     axios.defaults.headers.common["Authorization"] = `Bearer ${code}`;
     const response = await axios.get("http://localhost:8080/api/v1/user/profile");
-    console.log(response.data);
     // return response.data;
   } catch (error: any) {
     console.error("Kakao Login 실패:", error.response?.data || error.message);

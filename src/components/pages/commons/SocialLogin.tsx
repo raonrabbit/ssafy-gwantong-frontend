@@ -19,7 +19,7 @@ export default function SocialLogin() {
         </Button>
         <Button
           as={"a"}
-          href={`http://localhost:8080/oauth2/authorization/kakao`}
+          href={`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=606efaf9e836014c26d1900463f90444&redirect_uri=http://localhost:3000/auth/redirect`}
           width={"100%"}
           leftIcon={<FaComment />}
           colorScheme={"yellow"}

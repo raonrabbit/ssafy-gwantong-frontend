@@ -19,29 +19,65 @@ import { MdArrowBack, MdArrowDropDown } from "react-icons/md";
 import { IoIosArrowDown } from "react-icons/io";
 import TradeChart from "./TradeChart";
 import TradeList from "./TradeList";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Roadview } from "react-kakao-maps-sdk";
 
 interface MapResultProps {
   apartmentId: string;
 }
 
-const apartmentDetails: Record<string, { name: string; details: string }> = {
-  "1": { name: "청담자이", details: "708세대 2011년 10월 입주" },
-  "2": { name: "청담힐", details: "30세대 1997년 4월 입주" },
-  "3": { name: "청담르엘", details: "1,261세대 2025년 11월 입주" },
+const apartmentDetails: Record<
+  string,
+  { name: string; details: string; lat: number; lng: number }
+> = {
+  "1": {
+    name: "청담자이",
+    details: "708세대 2011년 10월 입주",
+    lat: 37.5236021633556,
+    lng: 127.057196117679,
+  },
+  "2": {
+    name: "청담힐",
+    details: "30세대 1997년 4월 입주",
+    lat: 37.5273578454093,
+    lng: 127.048456229401,
+  },
+  "3": {
+    name: "청담르엘",
+    details: "1,261세대 2025년 11월 입주",
+    lat: 37.5273578454093,
+    lng: 127.048456229401,
+  },
 };
 
 export default function MapResult({ apartmentId }: MapResultProps) {
   const apartment = apartmentDetails[apartmentId];
-
+  const [panoId, setPanoId] = useState<number | null>(null);
   const [isOn, setIsOn] = useState(true);
 
   const handleToggle = () => {
     setIsOn(!isOn);
   };
+
+  // useEffect(() => {
+  //   if (apartment) {
+  //     const roadviewClient = new window.kakao.maps.RoadviewClient();
+  //     const position = new window.kakao.maps.LatLng(apartment.lat, apartment.lng);
+  //     console.log("position:", position);
+  //     console.log("roadviewClient:", roadviewClient);
+  //     roadviewClient.getNearestPanoId(position, 50, (nearestPanoId) => {
+  //       setPanoId(nearestPanoId);
+  //     });
+  //   }
+  // }, [apartment]);
+
   if (!apartment) {
     return <Text>아파트 정보를 찾을 수 없습니다.</Text>;
   }
+
+  // if (!panoId) {
+  //   return <Text>이 위치에서 로드뷰를 찾을 수 없습니다.</Text>;
+  // }
 
   return (
     <Box
@@ -228,6 +264,21 @@ export default function MapResult({ apartmentId }: MapResultProps) {
             </MenuList>
           </Menu>
         </HStack>
+        <Roadview
+          position={{
+            // 지도의 중심좌표
+            lat: apartment.lat,
+            lng: apartment.lng,
+            radius: 100,
+          }}
+          // panoId={panoId || undefined} // panoId가 설정되면 사용
+          style={{
+            // 지도의 크기
+            width: "100%",
+            height: "300px",
+            marginTop: "10px",
+          }}
+        />
         <HStack justifyContent={"space-between"} minW={"358px"} px={5} mt={4}>
           <VStack justifyContent={"space-between"} align={"start"}>
             <Text color={"#FF9C60"} fontSize={"15px"} lineHeight={"17px"}>

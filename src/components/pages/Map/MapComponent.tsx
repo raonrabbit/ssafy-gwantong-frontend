@@ -214,8 +214,8 @@ export default function MapComponent() {
           kakao.maps.event.addListener(map, "idle", () => onIdle(map));
         }}
       >
-        {/* zoomLevel 3이하 필터링된 마커 */}
-        {zoomLevel <= 3 &&
+        {/* zoomLevel 4이하 필터링된 마커 */}
+        {zoomLevel <= 4 &&
           filteredPositions.map(({ id, lat, lng, name, price }) => (
             <CustomOverlayMap key={`marker-${id}`} position={{ lat, lng }}>
               <Box
@@ -252,9 +252,8 @@ export default function MapComponent() {
               </Box>
             </CustomOverlayMap>
           ))}
-        {/* zoomLevel 4이상 필터링된 마커 */}
-        {zoomLevel >= 4 &&
-          zoomLevel <= 5 &&
+        {/* zoomLevel 5이상 필터링된 마커 */}
+        {zoomLevel === 5 &&
           filteredDongs.map(({ lat, lng, dong }: any) => (
             <CustomOverlayMap key={`dong-${dong}`} position={{ lat, lng }}>
               <VStack
