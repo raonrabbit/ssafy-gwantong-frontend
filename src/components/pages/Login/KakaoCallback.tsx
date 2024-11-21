@@ -2,54 +2,96 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { kakaoLogin } from "../../../api/auth";
+import { useAppDispatch } from "../../../redux/hooks";
+import { login } from "../../../redux/slices/authSlice";
+import { useToast } from "@chakra-ui/react";
 
 export default function KakaoCallback() {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const toast = useToast();
 
   useEffect(() => {
-    // URL에서 code 파라미터 추출
     const query = new URLSearchParams(window.location.search);
     const code = query.get("code");
-    // console.log(code);
 
-    const localAxios = () => {
-      const instance = axios.create({
-        baseURL: "http://localhost:8080",
-        headers: {
-          "Content-Type": "application/json;charset=utf-8",
-        },
-        withCredentials: true, // 인증 정보 포함
-      });
-      return instance;
-    };
-    const API = localAxios();
-    if (code) {
-      API.post("/api/v1/auth/login/kakao", { code })
-        .then((response: any) => {
-          const accessToken = response.data.accessToken;
-          // JWT 저장 (예: localStorage)
-          axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-          // localStorage.setItem("token", response.data?.accessToken);
-          // 로그인 성공 후 홈으로 이동
-          navigate("/");
-        })
-        .catch((error) => {
-          console.error("로그인 실패:", error.response?.data || error.message);
-          navigate("/login");
+    const handleKakaoLogin = async () => {
+      if (!code) {
+        toast({
+          title: "로그인 실패",
+          description: "code 파라미터가 없습니다. 다시 시도해주세요.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
         });
-      // fetch("http://localhost:8080/api/v1/user", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     code: code,
-      //   }),
-      // })
-      //   .then((response) => response.json())
-      //   .then((result) => console.log(result));
-    } else {
-      console.error("code 파라미터가 없습니다.");
-      navigate("/login");
-    }
-  }, [navigate]);
+        navigate("/login");
+        return;
+      }
+
+      try {
+        // 1. 카카오 로그인 API 호출
+        const loginResponse: any = await kakaoLogin(code);
+        const accessToken = loginResponse.data?.accessToken;
+
+        if (!accessToken) {
+          toast({
+            title: "로그인 실패",
+            description: "액세스 토큰을 받을 수 없습니다. 다시 시도해주세요.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+          navigate("/login");
+          return;
+        }
+
+        // 2. 토큰으로 사용자 정보 요청
+        const userResponse: any = await axios.get("http://localhost:8080/api/v1/user/profile", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          withCredentials: true,
+        });
+
+        const { email, nickname, profileImage } = userResponse.data;
+
+        // 3. Redux 상태 업데이트
+        dispatch(
+          login({
+            user: { email, nickname, profileImage },
+            token: accessToken,
+          })
+        );
+
+        // 4. 로컬 스토리지 저장 (선택적)
+        localStorage.setItem("token", accessToken);
+        localStorage.setItem("user", JSON.stringify(userResponse.data));
+
+        // 성공 메시지
+        toast({
+          title: "로그인 성공",
+          description: `${nickname}님, 환영합니다!`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
+        // 5. 홈으로 이동
+        navigate("/");
+      } catch (error) {
+        toast({
+          title: "로그인 실패",
+          description: "로그인 처리 중 오류가 발생했습니다. 다시 시도해주세요.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        navigate("/login");
+      }
+    };
+
+    handleKakaoLogin();
+  }, [dispatch, navigate, toast]);
 
   return <div>카카오 로그인 처리 중...</div>;
 }

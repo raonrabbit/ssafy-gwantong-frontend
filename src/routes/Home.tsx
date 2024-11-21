@@ -7,25 +7,6 @@ import axios from "axios";
 
 export default function Home() {
   const backgroundColor = useColorModeValue("gray.100", "gray.800");
-  console.log(localStorage.getItem("token"));
-  axios
-    .get("http://localhost:8080/api/v1/user/profile", {
-      withCredentials: true,
-    })
-    .then((response) => {
-      console.log(response.data); // 응답 데이터 처리
-    })
-    .catch((error) => {
-      console.error("Error fetching profile image:", error);
-    });
-  // axios
-  //   .get("http://localhost:8080/api/v1/user/profile")
-  //   .then((response) => {
-  //     console.log(response);
-  //   })
-  //   .catch((error) => {
-  //     console.log(error);
-  //   });
   return (
     <Box bg={backgroundColor} paddingTop="88px">
       <Banner></Banner>

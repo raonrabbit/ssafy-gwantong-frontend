@@ -21,7 +21,7 @@ import { logout } from "../../../redux/slices/authSlice"; // Redux logout action
 
 export default function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
-  const user = useAppSelector((state) => state.auth.user); // Redux 상태에서 사용자 정보 가져오기
+  const user = useAppSelector((state) => state.auth.user); // Redux에서 사용자 정보 가져오기
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
@@ -34,12 +34,11 @@ export default function Header() {
   const headerColor = useColorModeValue("rgba(255, 255, 255, 0.7)", "rgba(26, 32, 44, 0.7)");
 
   const handleLogout = () => {
-    // localStorage에서 토큰 및 사용자 정보 제거
+    // 로컬 스토리지와 Redux 상태 초기화
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    // Redux 상태 초기화
     dispatch(logout());
+    navigate("/login");
   };
 
   const navigateToMyPage = () => {
@@ -84,7 +83,7 @@ export default function Header() {
             aria-label="Toggle Dark Mode"
             icon={<Icon />}
           />
-          {user ? ( // Redux 상태에서 user가 존재하면 Avatar와 로그아웃 메뉴를 표시
+          {user ? ( // Redux에서 user 정보로 UI 렌더링
             <Menu>
               <MenuButton>
                 <Avatar

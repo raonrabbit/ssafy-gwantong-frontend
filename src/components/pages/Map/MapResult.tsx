@@ -13,6 +13,7 @@ import {
   Button,
   Flex,
   Grid,
+  Skeleton,
 } from "@chakra-ui/react";
 import { FaSearch, FaRegHeart } from "react-icons/fa";
 import { MdArrowBack, MdArrowDropDown } from "react-icons/md";
@@ -20,6 +21,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import TradeChart from "./TradeChart";
 import TradeList from "./TradeList";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface MapResultProps {
   apartmentId: string;
@@ -27,23 +29,26 @@ interface MapResultProps {
 
 const apartmentDetails: Record<
   string,
-  { name: string; details: string; lat: number; lng: number }
+  { name: string; details: string; address: string; lat: number; lng: number }
 > = {
   "1": {
     name: "청담자이",
     details: "708세대 2011년 10월 입주",
+    address: "서울특별시 강남구 청담동 134-38",
     lat: 37.5236021633556,
     lng: 127.057196117679,
   },
   "2": {
     name: "청담힐",
     details: "30세대 1997년 4월 입주",
+    address: "서울특별시 강남구 청담동 134-38",
     lat: 37.5273578454093,
     lng: 127.048456229401,
   },
   "3": {
     name: "청담르엘",
     details: "1,261세대 2025년 11월 입주",
+    address: "서울특별시 강남구 청담동 134-38",
     lat: 37.5273578454093,
     lng: 127.048456229401,
   },
@@ -53,32 +58,47 @@ export default function MapResult({ apartmentId }: MapResultProps) {
   const apartment = apartmentDetails[apartmentId];
   const roadviewRef = useRef<HTMLDivElement>(null);
   const [isOn, setIsOn] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
+  const navigate = useNavigate();
 
   const handleToggle = () => {
     setIsOn(!isOn);
   };
+
   useEffect(() => {
-    if (!roadviewRef.current) return;
+    if (!apartment) {
+      navigate("/notfound", { replace: true }); // 무한 루프 방지
+      return;
+    }
+    if (!roadviewRef.current) {
+      setIsLoading(false); // 컨테이너가 없을 경우 로딩 종료
+      return;
+    }
 
     const roadview = new window.kakao.maps.Roadview(roadviewRef.current);
     const roadviewClient = new window.kakao.maps.RoadviewClient();
     const markerPosition = new window.kakao.maps.LatLng(apartment.lat, apartment.lng);
+    setTimeout(() => {
+      // 로드뷰 설정 및 마커 추가
+      roadviewClient.getNearestPanoId(markerPosition, 500, (panoId) => {
+        if (panoId) {
+          roadview.setPanoId(panoId, markerPosition);
 
-    // 로드뷰 설정 및 마커 추가
-    roadviewClient.getNearestPanoId(markerPosition, 100, (panoId) => {
-      roadview.setPanoId(panoId, markerPosition);
-
-      // 마커 추가
-      const marker = new window.kakao.maps.Marker({
-        position: markerPosition,
+          // 마커 추가
+          const marker = new window.kakao.maps.Marker({
+            position: markerPosition,
+          });
+          marker.setMap(roadview); // 마커를 로드뷰에 추가
+        } else {
+          console.warn("로드뷰 데이터를 찾을 수 없습니다.");
+        }
       });
-      marker.setMap(roadview); // 마커를 로드뷰에 추가
-    });
-  }, [apartment]);
+    }, 1000);
 
-  if (!apartment) {
-    return <Text>아파트 정보를 찾을 수 없습니다.</Text>;
-  }
+    setIsLoading(false); // 로드뷰 로딩 완료 후 로딩 상태 종료
+  }, [apartment, navigate]);
+
+  if (!apartment) return null; // navigate 후 렌더링 방지
 
   return (
     <Box
@@ -124,6 +144,12 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           </Text>
         </Box>
         <HStack w={"52px"} justifyContent={"center"}></HStack>
+      </HStack>
+
+      <HStack justifyContent={"center"} bg={"#F37021"} borderBottom={"1px solid #FF9C60"}>
+        <Text fontSize={"14px"} lineHeight={"27px"} color={"#533B0C"}>
+          {apartment.address}
+        </Text>
       </HStack>
 
       <HStack h={"40px"} bg={"#F37021"} gap={0}>

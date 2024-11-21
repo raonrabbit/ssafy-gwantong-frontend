@@ -17,18 +17,12 @@ interface userData {
   nickname: string;
 }
 
-// http://localhost:8080/oauth2/authorization/kakao
 export const kakaoLogin = async (code: string) => {
   try {
-    console.log(code);
-    // const response = await axios.post("http://localhost:8080/api/auth/oauth2/token", {
-    //   code, // 인증 코드 전달
-    // });
-    axios.defaults.headers.common["Authorization"] = `Bearer ${code}`;
-    const response = await axios.get("http://localhost:8080/api/v1/user/profile");
-    // return response.data;
+    const response = await axiosInstance.post("auth/login/kakao", { code });
+    return response.data;
   } catch (error: any) {
-    console.error("Kakao Login 실패:", error.response?.data || error.message);
+    console.error("Kakao Login failed:", error.response?.data || error.message);
     throw error.response?.data || "Kakao Login failed";
   }
 };
