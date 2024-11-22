@@ -37,26 +37,6 @@ export const logout = async () => {
   }
 };
 
-// export const login = async (email: string, password: string): Promise<LoginApiResponse> => {
-//   try {
-//     const response = await axios.post(
-//       `${API_BASE_URL}/login`,
-//       { email, password },
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     return response.data as LoginApiResponse; // 반환 데이터를 LoginApiResponse로 캐스팅
-//   } catch (error: any) {
-//     return {
-//       success: false,
-//       error: error.response?.data?.error || "Login failed",
-//     };
-//   }
-// };
-
 export const login = async (email: string, password: string): Promise<LoginApiResponse> => {
   console.log("email : " + email + ", password: " + password);
   const response = {

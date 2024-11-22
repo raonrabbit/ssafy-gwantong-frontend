@@ -17,7 +17,8 @@ import {
 import { FaMoon, FaSun } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks"; // Redux Hooks
-import { logout } from "../../../redux/slices/authSlice"; // Redux logout action
+import { logout as reduxLogout } from "../../../redux/slices/authSlice"; // Redux logout action
+import { logout as APILogout } from "../../../api/auth";
 
 export default function Header() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -34,10 +35,12 @@ export default function Header() {
   const headerColor = useColorModeValue("rgba(255, 255, 255, 0.7)", "rgba(26, 32, 44, 0.7)");
 
   const handleLogout = () => {
+    APILogout();
+
     // 로컬 스토리지와 Redux 상태 초기화
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    dispatch(logout());
+    dispatch(reduxLogout());
     navigate("/login");
   };
 
