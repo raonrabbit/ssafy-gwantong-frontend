@@ -27,6 +27,16 @@ export const kakaoLogin = async (code: string) => {
   }
 };
 
+export const logout = async () => {
+  try {
+    const response = await axiosInstance.post("auth/logout");
+    return response.data;
+  } catch (error: any) {
+    console.error("Kakao Login failed:", error.response?.data || error.message);
+    throw error.response?.data || "Kakao Login failed";
+  }
+};
+
 // export const login = async (email: string, password: string): Promise<LoginApiResponse> => {
 //   try {
 //     const response = await axios.post(

@@ -31,7 +31,7 @@ export default function KakaoCallback() {
       try {
         // 1. 카카오 로그인 API 호출
         const loginResponse: any = await kakaoLogin(code);
-        const accessToken = loginResponse.data?.accessToken;
+        const accessToken = loginResponse?.accessToken;
 
         if (!accessToken) {
           toast({
@@ -52,13 +52,12 @@ export default function KakaoCallback() {
           },
           withCredentials: true,
         });
-
-        const { email, nickname, profileImage } = userResponse.data;
+        const { email, nickname, profileImageUrl } = userResponse.data;
 
         // 3. Redux 상태 업데이트
         dispatch(
           login({
-            user: { email, nickname, profileImage },
+            user: { email, nickname, profileImageUrl },
             token: accessToken,
           })
         );

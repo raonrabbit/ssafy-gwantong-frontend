@@ -86,11 +86,7 @@ export default function Header() {
           {user ? ( // Redux에서 user 정보로 UI 렌더링
             <Menu>
               <MenuButton>
-                <Avatar
-                  name={user.nickname}
-                  src={user.profileImage || undefined}
-                  cursor="pointer"
-                />
+                <Avatar name={user.nickname} src={user.profileImageUrl} cursor="pointer" />
               </MenuButton>
               <MenuList>
                 <MenuItem onClick={navigateToMyPage}>마이페이지</MenuItem>
