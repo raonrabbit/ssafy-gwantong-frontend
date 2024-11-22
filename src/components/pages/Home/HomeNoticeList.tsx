@@ -1,7 +1,8 @@
 import { Box, Grid, Heading, HStack, Stack, Text, VStack, Image } from "@chakra-ui/react";
 import { FaRegClipboard } from "react-icons/fa";
 import { IoIosPaper } from "react-icons/io";
-import NoticeCard from "./NoticeCard";
+import NoticeCard from "./HomeNoticeCard";
+import { Link } from "react-router-dom";
 
 type NoticeCardProps = {
   title: string;
@@ -9,7 +10,7 @@ type NoticeCardProps = {
   content: string;
 };
 
-export default function NoticeList() {
+export default function HomeNoticeList() {
   const notices: NoticeCardProps[] = [
     {
       title: "공지사항",
@@ -35,11 +36,16 @@ export default function NoticeList() {
 
   return (
     <VStack maxW={"1712px"} marginX={"auto"} align="stretch" mt={48} pb={48} gap={0}>
-      <HStack alignItems="center">
-        <Image src={"images/Gongji.webp"} h={"78px"} />
-        <Heading as="h1" size="lg">
-          공지사항
-        </Heading>
+      <HStack justifyContent={"space-between"}>
+        <HStack alignItems="center">
+          <Image src={"images/Gongji.webp"} h={"78px"} />
+          <Heading as="h1" size="lg">
+            공지사항
+          </Heading>
+        </HStack>
+        <Link to={"/notices"}>
+          <Text fontSize={"14px"}>목록 보기</Text>
+        </Link>
       </HStack>
 
       <Grid

@@ -7,7 +7,7 @@ type NoticeCardProps = {
   content: string;
 };
 
-export default function NoticeCard({ title, date, content }: NoticeCardProps) {
+export default function HomeNoticeCard({ title, date, content }: NoticeCardProps) {
   const cardBox = useColorModeValue("white", "gray.700");
   const cardTagContent = useColorModeValue("#F7FAFC", "gray.500");
   const cardDateContent = useColorModeValue("#333333", "gray.400");

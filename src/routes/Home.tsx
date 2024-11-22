@@ -2,7 +2,7 @@ import { Box, HStack, Image, Stack, Text, VStack, useColorModeValue } from "@cha
 import PropertyList from "../components/pages/Home/PropertyList";
 import NewsList from "../components/pages/Home/NewsList";
 import Banner from "../components/pages/Home/Banner";
-import NoticeList from "../components/pages/Home/NoticeList";
+import NoticeList from "../components/pages/Home/HomeNoticeList";
 import axios from "axios";
 
 export default function Home() {

@@ -22,8 +22,20 @@ export default function Banner() {
   const serviceTagContent = useColorModeValue("#2E2E2E", "gray.400");
 
   return (
-    <Stack direction={"row"} maxW={"1712px"} marginX={"auto"} pt={6}>
-      <Box w={"1424px"} h={"808px"} borderRadius={"36px"} position={"relative"}>
+    <Stack
+      direction={{ md: "row", sm: "column" }}
+      maxW={"1712px"}
+      marginX={"auto"}
+      pt={6}
+      mt={{ sm: "40px", md: "0px" }}
+      alignItems={{ sm: "center" }}
+    >
+      <Box
+        w={{ sm: "600px", md: "1424px" }}
+        h={{ md: "808px" }}
+        borderRadius={"36px"}
+        position={"relative"}
+      >
         <Box
           right={0}
           top={0}
@@ -56,25 +68,31 @@ export default function Banner() {
         </Box>
         <Image src="/images/banner.png" borderRadius={"36px"}></Image>
       </Box>
-      <VStack w={"272px"} h={"808px"} justifyContent={"space-between"}>
+
+      <Stack
+        direction={{ sm: "row", md: "column" }}
+        w={{ sm: "600px", md: "272px" }}
+        h={{ sm: "200px", md: "808px" }}
+        justifyContent={"space-between"}
+      >
         <Box
-          w={"272px"}
-          h={"272px"}
+          w={{ sm: "200px", md: "272px" }}
+          h={{ sm: "200px", md: "272px" }}
           borderRadius={"24px"}
           bg={"#F37021"}
           textAlign={"center"}
           color={"#1F1F1F"}
         >
-          <Text fontSize={"24px"} fontWeight={"700"} mt={20}>
+          <Text fontSize={{ sm: "18px", md: "24px" }} fontWeight={"700"} mt={{ sm: 16, md: 20 }}>
             거래 가능한 부동산 건 수
           </Text>
-          <Text fontSize={"32px"} fontWeight={"700"} mt={4}>
+          <Text fontSize={{ sm: "20px", md: "32px" }} fontWeight={"700"} mt={4}>
             2,100,000 건
           </Text>
         </Box>
         <VStack
-          w={"272px"}
-          h={"238px"}
+          w={{ sm: "200px", md: "272px" }}
+          h={{ sm: "200px", md: "272px" }}
           p={"4"}
           borderRadius={"24px"}
           bg={cardBox}
@@ -92,14 +110,20 @@ export default function Banner() {
             #부동산은 이집어때 #가을 좋아
           </Text>
         </VStack>
-        <VStack w={"272px"} h={"285px"} borderRadius={"24px"} bg={cardBox} p={4}>
+        <VStack
+          w={{ sm: "200px", md: "272px" }}
+          h={{ sm: "200px", md: "272px" }}
+          borderRadius={"24px"}
+          bg={cardBox}
+          p={4}
+        >
           <VStack justifyContent={"flex-start"} gap={0}>
             <Image h={"30px"} src="/images/Crown.webp" />
             <Text lineHeight={"16px"} fontSize={16} fontWeight={"bold"}>
               인기지역
             </Text>
           </VStack>
-          <VStack w={"100%"} h={"100%"} justifyContent={"space-between"} pt={4}>
+          <VStack w={"100%"} h={"100%"} justifyContent={"space-between"} pt={{ sm: 1, md: 4 }}>
             <Box
               px={4}
               bg={subCardBox}
@@ -108,7 +132,7 @@ export default function Banner() {
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}
             >
-              <Text fontSize={16} fontWeight={"bold"} lineHeight={"48px"}>
+              <Text fontSize={16} fontWeight={"bold"} lineHeight={{ sm: "28px", md: "48px" }}>
                 1. 서울 강남구
               </Text>
             </Box>
@@ -120,7 +144,7 @@ export default function Banner() {
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}
             >
-              <Text fontSize={16} fontWeight={"bold"} lineHeight={"48px"}>
+              <Text fontSize={16} fontWeight={"bold"} lineHeight={{ sm: "28px", md: "48px" }}>
                 2. 서울 송파구
               </Text>
             </Box>
@@ -132,13 +156,13 @@ export default function Banner() {
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}
             >
-              <Text fontSize={16} fontWeight={"bold"} lineHeight={"48px"}>
+              <Text fontSize={16} fontWeight={"bold"} lineHeight={{ sm: "28px", md: "48px" }}>
                 3. 서울 서초구
               </Text>
             </Box>
           </VStack>
         </VStack>
-      </VStack>
+      </Stack>
     </Stack>
   );
 }
