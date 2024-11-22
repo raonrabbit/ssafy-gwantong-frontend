@@ -41,7 +41,7 @@ export default function BookmarkPageComponent() {
             position="relative"
             display="flex"
             alignItems="center"
-            bg="black"
+            bg="white"
             width="180px"
             height="40px"
             borderRadius="24px"
@@ -51,24 +51,24 @@ export default function BookmarkPageComponent() {
             <Box
               position="absolute"
               top="0"
-              left={activePage === 0 ? "0%" : "50%"}
+              left={activePage === 0 ? "calc(0% - 1px)" : "calc(50% + 1px)"}
               width="50%"
               height="100%"
               bg={useColorModeValue("customOrange.500", "customOrange.700")}
               borderRadius="24px"
               transition="left 0.3s ease-in-out"
             />
-            {/* 버튼 */}
+            {/*버튼*/}
             {["아파트", "매물"].map((label, index) => (
               <Button
                 key={label}
-                onClick={() => handleScrollToPage(index)}
+                onClick={() => handleScrollToPage(activePage === 0 ? 1 : 0)} // 현재 페이지의 반대로 이동
                 bg="transparent"
                 zIndex="1"
                 variant={activePage === index ? "solid" : "ghost"}
                 width="50%"
                 _hover={{ bg: "none" }}
-                color={activePage === index ? "black" : "white"}
+                color={activePage === index ? "white" : "black"}
               >
                 {label}
               </Button>
