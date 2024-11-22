@@ -9,6 +9,9 @@ import MyPage from "./routes/MyPage";
 import MapSearchPage from "./routes/MapSearchPage";
 import MapResultPage from "./routes/MapResultPage";
 import KakaoCallback from "./components/pages/Login/KakaoCallback";
+import NoticesPage from "./routes/NoticesPage";
+import NoticeDetail from "./components/pages/Notice/NoticeDetails";
+import NoticeRegister from "./components/pages/Notice/NoticeRegister";
 
 const router = createBrowserRouter([
   {
@@ -49,6 +52,18 @@ const router = createBrowserRouter([
             element: <MapResultPage />,
           },
         ],
+      },
+      {
+        path: "notices",
+        element: <NoticesPage />,
+      },
+      {
+        path: "notices/register",
+        element: <NoticeRegister />,
+      },
+      {
+        path: "notices/:id",
+        element: <NoticeDetail />,
       },
     ],
   },
