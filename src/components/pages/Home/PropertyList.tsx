@@ -20,7 +20,8 @@ type PropertyCardProps = {
 };
 
 export default function PropertyList() {
-  const buttonColor = useColorModeValue("#1F1F1F", "gray.600");
+  const buttonColor = useColorModeValue("blackAlpha.900", "gray.600");
+  const hoverColor = useColorModeValue("blackAlpha.700", "gray.400");
   const properties: PropertyCardProps[] = [
     {
       imageUrl: "/images/property1.png",
@@ -121,6 +122,9 @@ export default function PropertyList() {
         mx="auto"
         color={"white"}
         w={"200px"}
+        _hover={{
+          backgroundColor: hoverColor,
+        }}
       >
         더보기
       </Button>
