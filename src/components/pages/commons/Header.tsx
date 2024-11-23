@@ -15,7 +15,7 @@ import {
   MenuItem,
 } from "@chakra-ui/react";
 import { FaMoon, FaSun } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../redux/hooks"; // Redux Hooks
 import { logout as reduxLogout } from "../../../redux/slices/authSlice"; // Redux logout action
 import { logout as APILogout } from "../../../api/auth";
@@ -25,6 +25,7 @@ export default function Header() {
   const user = useAppSelector((state) => state.auth.user); // Redux에서 사용자 정보 가져오기
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation(); // 현재 경로 가져오기
   const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
   const logoSymbolSrc = "/images/symbol.svg";
   const responsiveLogoSrc = useBreakpointValue({
@@ -33,6 +34,7 @@ export default function Header() {
   });
   const Icon = useColorModeValue(FaMoon, FaSun);
   const headerColor = useColorModeValue("rgba(255, 255, 255, 0.7)", "rgba(26, 32, 44, 0.7)");
+  const maxWidth = location.pathname.includes("/map") ? "calc(100vw - 20px)" : "1712px";
 
   const handleLogout = () => {
     APILogout();
@@ -61,7 +63,7 @@ export default function Header() {
     >
       <Stack
         paddingY={5}
-        maxW={"1712px"}
+        maxW={maxWidth}
         marginX={"auto"}
         alignItems={"center"}
         direction={{
