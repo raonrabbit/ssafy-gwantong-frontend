@@ -56,6 +56,7 @@ const apartmentDetails: Record<
 
 export default function MapResult({ apartmentId }: MapResultProps) {
   const apartment = apartmentDetails[apartmentId];
+  const [searchValue, setSearchValue] = useState(apartment.name);
   const roadviewRef = useRef<HTMLDivElement>(null);
   const [isOn, setIsOn] = useState(true);
   const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
@@ -63,6 +64,16 @@ export default function MapResult({ apartmentId }: MapResultProps) {
 
   const handleToggle = () => {
     setIsOn(!isOn);
+  };
+
+  const handleSearch = () => {
+    if (searchValue.trim() !== "") {
+      navigate(`/map/search?query=${encodeURIComponent(searchValue)}`);
+    }
+  };
+
+  const handleBackButton = () => {
+    navigate(`/map/search?query=${encodeURIComponent(apartment.name)}`);
   };
 
   useEffect(() => {
@@ -119,8 +130,19 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           borderRadius={24}
           borderColor={"#F37021"}
           bg={"white"}
-          value={apartment.name}
-          readOnly
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          focusBorderColor="#FF9C60"
+          _focus={{
+            borderWidth: "1px",
+            borderColor: "#FF9C60",
+            boxShadow: "none",
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSearch(); // 엔터 키를 누르면 handleSearch 호출
+            }
+          }}
         />
         <InputRightAddon
           bg={"#F37021"}
@@ -128,6 +150,8 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           borderBottomEndRadius={24}
           borderColor={"#F37021"}
           px={3}
+          onClick={handleSearch}
+          cursor={"pointer"}
         >
           <FaSearch size={16} color="#FFFFFF" />
         </InputRightAddon>
@@ -135,7 +159,7 @@ export default function MapResult({ apartmentId }: MapResultProps) {
 
       {/* 아파트 상세 정보 */}
       <HStack h={"52px"} bg={"#F37021"} justifyContent={"space-between"}>
-        <HStack w={"52px"} justifyContent={"center"}>
+        <HStack w={"52px"} justifyContent={"center"} onClick={handleBackButton}>
           <MdArrowBack size={24} color="white" />
         </HStack>
         <Box>

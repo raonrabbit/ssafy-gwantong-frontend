@@ -1,6 +1,8 @@
 import { Box, HStack, Input, InputGroup, InputRightAddon, Text, VStack } from "@chakra-ui/react";
+import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { MdArrowBack, MdClose } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 interface MapSearchProps {
   searchQuery: string;
@@ -8,6 +10,9 @@ interface MapSearchProps {
 }
 
 export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchProps) {
+  const [searchValue, setSearchValue] = useState(searchQuery);
+  const navigate = useNavigate();
+
   const apartments = [
     { id: 1, name: "청담자이", details: "708세대 2011년 10월 입주" },
     { id: 2, name: "청담힐", details: "30세대 1997년 4월 입주" },
@@ -15,6 +20,16 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
   ];
 
   const filteredApartments = apartments.filter((apt) => apt.name.includes(searchQuery));
+
+  const handleSearch = () => {
+    if (searchValue.trim() !== "") {
+      navigate(`/map/search?query=${encodeURIComponent(searchValue)}`);
+    }
+  };
+
+  const handleBackButton = () => {
+    navigate(`/map`);
+  };
 
   return (
     <Box
@@ -33,8 +48,19 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
           borderRadius={24}
           borderColor={"#F37021"}
           bg={"white"}
-          value={searchQuery}
-          isReadOnly
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          focusBorderColor="#FF9C60"
+          _focus={{
+            borderWidth: "1px",
+            borderColor: "#FF9C60",
+            boxShadow: "none",
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSearch(); // 엔터 키를 누르면 handleSearch 호출
+            }
+          }}
         />
         <InputRightAddon
           bg={"#F37021"}
@@ -42,13 +68,15 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
           borderBottomEndRadius={24}
           borderColor={"#F37021"}
           px={3}
+          onClick={handleSearch}
+          cursor={"pointer"}
         >
           <FaSearch size={16} color="#FFFFFF" />
         </InputRightAddon>
       </InputGroup>
 
       <HStack h={"52px"} bg={"#F37021"} justifyContent={"space-between"}>
-        <HStack w={"52px"} justifyContent={"center"}>
+        <HStack w={"52px"} justifyContent={"center"} cursor={"pointer"} onClick={handleBackButton}>
           <MdArrowBack size={24} color="white" />
         </HStack>
         <Box>
@@ -56,7 +84,7 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
             {searchQuery} 검색 결과
           </Text>
         </Box>
-        <HStack w={"52px"} justifyContent={"center"}>
+        <HStack w={"52px"} justifyContent={"center"} cursor={"pointer"} onClick={handleBackButton}>
           <MdClose size={24} color="white" />
         </HStack>
       </HStack>

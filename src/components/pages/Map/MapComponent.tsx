@@ -1,21 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
   Input,
   InputGroup,
   InputRightAddon,
-  VStack,
+  Skeleton,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { Map, CustomOverlayMap, MapMarker } from "react-kakao-maps-sdk";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getApts, getDongAvg, getSigunguAvg, getSidoAvg } from "../../../api/apt";
 import { MdMyLocation } from "react-icons/md";
-import positionsData from "./MapPosition.json";
-import dongData from "./dong.json";
-import sigunguData from "./sigungu.json";
-import sidoData from "./sido.json";
 import { FaSearch } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 interface BoundPosition {
   lat: number;
@@ -30,6 +29,67 @@ interface Bound {
 export default function MapComponent() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
+  const [bounds, setBounds] = useState<Bound | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(3); // 초기 줌 레벨
+  const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null); // 지도 인스턴스 저장
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null); // 현재 위치 저장
+  const toast = useToast();
+
+  // 데이터 fetch 함수
+  const fetchMapData = async (): Promise<any[]> => {
+    if (!bounds) return []; // Bounds가 없으면 빈 배열 반환
+    if (zoomLevel <= 4) return await getApts(bounds);
+    if (zoomLevel === 5) return await getDongAvg(bounds);
+    if (zoomLevel >= 6 && zoomLevel <= 9) return await getSigunguAvg(bounds);
+    return await getSidoAvg(bounds);
+  };
+
+  // React Query 사용
+  const { data, isLoading, isError, error, refetch } = useQuery<any[], Error>({
+    queryKey: ["mapData", bounds, zoomLevel],
+    queryFn: fetchMapData,
+    // enabled: !!bounds, // bounds가 설정된 경우에만 실행
+    enabled: true, // 항상 실행
+    retry: 1, // 요청 실패 시 한 번만 재시도
+  });
+
+  useEffect(() => {
+    if (mapInstance) {
+      const kakaoBounds = mapInstance.getBounds();
+      const sw = kakaoBounds.getSouthWest();
+      const ne = kakaoBounds.getNorthEast();
+
+      const initialBounds = {
+        sw: { lat: sw.getLat(), lng: sw.getLng() },
+        ne: { lat: ne.getLat(), lng: ne.getLng() },
+      };
+
+      setBounds(initialBounds);
+      // console.log("초기 bounds 설정:", initialBounds);
+    }
+  }, [mapInstance]);
+
+  useEffect(() => {
+    if (bounds) {
+      // console.log("Bounds updated, refetching data...");
+      refetch();
+    }
+  }, [bounds, refetch]);
+
+  const onIdle = (map: kakao.maps.Map) => {
+    const kakaoBounds = map.getBounds();
+    const sw = kakaoBounds.getSouthWest();
+    const ne = kakaoBounds.getNorthEast();
+
+    const newBounds = {
+      sw: { lat: sw.getLat(), lng: sw.getLng() },
+      ne: { lat: ne.getLat(), lng: ne.getLng() },
+    };
+
+    // console.log("New bounds:", newBounds);
+    setBounds(newBounds); // refetch는 useEffect에서 처리
+    setZoomLevel(map.getLevel());
+  };
 
   const handleSearch = () => {
     if (searchValue.trim() !== "") {
@@ -37,33 +97,9 @@ export default function MapComponent() {
     }
   };
 
-  const toast = useToast(); // Toast 훅 초기화
-
-  const positions = positionsData.filtered;
-  const dongs = dongData.seoul;
-  const sigungus = sigunguData.seoul;
-  const sidos = sidoData.sido;
-  const [bounds, setBounds] = useState<Bound | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<number>(3); // 초기 줌 레벨 설정
-  const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null); // 지도 인스턴스 저장
-  const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null); // 현재 위치 저장
-
-  const onIdle = (map: kakao.maps.Map) => {
-    const kakaoBounds = map.getBounds();
-    const sw = kakaoBounds.getSouthWest();
-    const ne = kakaoBounds.getNorthEast();
-
-    setBounds({
-      sw: { lat: sw.getLat(), lng: sw.getLng() },
-      ne: { lat: ne.getLat(), lng: ne.getLng() },
-    });
-
-    setZoomLevel(map.getLevel()); // 줌 레벨 업데이트
-  };
-
   const handleZoomIn = () => {
     if (mapInstance) {
-      mapInstance.setLevel(mapInstance.getLevel() - 1); // 줌 인
+      setZoomLevel(zoomLevel - 1); // 줌 인
       toast({
         title: "줌 인",
         description: `현재 줌 레벨: ${mapInstance.getLevel() - 1}`,
@@ -76,7 +112,7 @@ export default function MapComponent() {
 
   const handleZoomOut = () => {
     if (mapInstance) {
-      mapInstance.setLevel(mapInstance.getLevel() + 1); // 줌 아웃
+      setZoomLevel(zoomLevel + 1); // 줌 아웃
       toast({
         title: "줌 아웃",
         description: `현재 줌 레벨: ${mapInstance.getLevel() + 1}`,
@@ -133,69 +169,6 @@ export default function MapComponent() {
     }
   };
 
-  const filteredPositions = bounds
-    ? positions.filter(
-        (pos) =>
-          bounds &&
-          pos.lat >= bounds.sw.lat &&
-          pos.lat <= bounds.ne.lat &&
-          pos.lng >= bounds.sw.lng &&
-          pos.lng <= bounds.ne.lng
-      )
-    : positions;
-
-  const filteredDongs = bounds
-    ? dongs.filter(({ lat, lng }) => {
-        if (lat && lng) {
-          return (
-            bounds &&
-            lat >= bounds.sw.lat &&
-            lat <= bounds.ne.lat &&
-            lng >= bounds.sw.lng &&
-            lng <= bounds.ne.lng
-          );
-        }
-        return false;
-      })
-    : dongs;
-
-  const filteredSigungus = bounds
-    ? sigungus.filter(({ lat, lng }) => {
-        if (lat && lng) {
-          return (
-            bounds &&
-            lat >= bounds.sw.lat &&
-            lat <= bounds.ne.lat &&
-            lng >= bounds.sw.lng &&
-            lng <= bounds.ne.lng
-          );
-        }
-        return false;
-      })
-    : sigungus;
-
-  const filteredSidos = bounds
-    ? sidos.filter(({ lat, lng }) => {
-        if (lat && lng) {
-          return (
-            bounds &&
-            lat >= bounds.sw.lat &&
-            lat <= bounds.ne.lat &&
-            lng >= bounds.sw.lng &&
-            lng <= bounds.ne.lng
-          );
-        }
-        return false;
-      })
-    : sidos;
-
-  const convertToBillion = (value: any) => {
-    if (value) {
-      return (value / 10000).toFixed(1) + "억"; // 10000으로 나누고 소수점 1자리로 표시
-    }
-    return "정보 없음"; // 값이 없을 경우
-  };
-
   return (
     <div
       style={{
@@ -206,118 +179,65 @@ export default function MapComponent() {
       }}
     >
       <Map
-        center={{ lat: 37.5236077, lng: 127.0572148 }} // 초기 중심 좌표
-        level={zoomLevel} // 지도 확대/축소 레벨
+        center={{ lat: 37.5236077, lng: 127.0572148 }}
+        level={zoomLevel}
         style={{ width: "100%", height: "100%" }}
         onCreate={(map) => {
           setMapInstance(map);
           kakao.maps.event.addListener(map, "idle", () => onIdle(map));
         }}
       >
-        {/* zoomLevel 4이하 필터링된 마커 */}
-        {zoomLevel <= 4 &&
-          filteredPositions.map(({ id, lat, lng, name, price }) => (
-            <CustomOverlayMap key={`marker-${id}`} position={{ lat, lng }}>
-              <Box
-                w={"56px"}
-                h={"70px"}
-                // backgroundImage={`images/apt_up${isMaxPrice ? "4" : "1"}.png`}
-                backgroundImage={"images/apt_up1.png"}
-                textAlign={"center"}
-                color={"white"}
+        {/* Skeleton UI */}
+        {isLoading ? (
+          <Skeleton height="100px" width="100%" />
+        ) : isError ? (
+          <Box>데이터를 가져오는데 실패했습니다.</Box>
+        ) : (
+          data?.map((item: any, index: number) => {
+            if (!item.lat || !item.lng) return null; // 유효하지 않은 좌표는 무시
+            return (
+              <CustomOverlayMap
+                key={item.id || index}
+                position={{
+                  lat: item.lat,
+                  lng: item.lng,
+                }}
               >
-                <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
-                  {convertToBillion(price?.sales.min)}
-                </Box>
-                <Box lineHeight={1.1} fontSize={"10px"}>
-                  ~{convertToBillion(price?.sales.max)}
-                </Box>
                 <Box
-                  position="absolute"
-                  bottom="-16px"
-                  transform="translateX(-50%)"
-                  left="50%"
-                  fontSize="10px"
-                  lineHeight="1.4"
-                  color="white"
-                  pb="1px"
-                  px="3px"
-                  opacity="0.8"
-                  bg="rgb(96, 96, 96)"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
+                  w={"56px"}
+                  h={"70px"}
+                  backgroundImage={"images/apt_up1.png"}
+                  textAlign={"center"}
+                  color={"white"}
                 >
-                  {name}
+                  <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
+                    {item.minAmount ?? "N/A"}
+                  </Box>
+                  <Box lineHeight={1.1} fontSize={"10px"}>
+                    ~{item.maxAmount ?? "N/A"}
+                  </Box>
+                  <Box
+                    position="absolute"
+                    bottom="-16px"
+                    transform="translateX(-50%)"
+                    left="50%"
+                    fontSize="10px"
+                    lineHeight="1.4"
+                    color="white"
+                    pb="1px"
+                    px="3px"
+                    opacity="0.8"
+                    bg="rgb(96, 96, 96)"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                  >
+                    {item.name ?? "Unknown"}
+                  </Box>
                 </Box>
-              </Box>
-            </CustomOverlayMap>
-          ))}
-        {/* zoomLevel 5이상 필터링된 마커 */}
-        {zoomLevel === 5 &&
-          filteredDongs.map(({ lat, lng, dong }: any) => (
-            <CustomOverlayMap key={`dong-${dong}`} position={{ lat, lng }}>
-              <VStack
-                w={"85px"}
-                h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
-                textAlign={"center"}
-                color={"white"}
-                lineHeight={1.2}
-                justifyContent={"center"}
-                spacing={0}
-              >
-                <Box fontSize={"11px"}>{dong}</Box>
-                <Box fontSize={"12px"} fontWeight={"bold"}>
-                  25억
-                </Box>
-              </VStack>
-            </CustomOverlayMap>
-          ))}
-        {/* zoomLevel 6이상 필터링된 마커 */}
-        {zoomLevel >= 6 &&
-          zoomLevel <= 9 &&
-          filteredSigungus.map(({ lat, lng, sigungu }: any) => (
-            <CustomOverlayMap key={`sigungu-${sigungu}`} position={{ lat, lng }}>
-              <VStack
-                w={"85px"}
-                h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
-                textAlign={"center"}
-                color={"white"}
-                lineHeight={1.2}
-                justifyContent={"center"}
-                spacing={0}
-              >
-                <Box fontSize={"11px"}>{sigungu}</Box>
-                <Box fontSize={"12px"} fontWeight={"bold"}>
-                  25억
-                </Box>
-              </VStack>
-            </CustomOverlayMap>
-          ))}
-
-        {/* zoomLevel 10이상 필터링된 마커 */}
-        {zoomLevel >= 10 &&
-          filteredSidos.map(({ lat, lng, sido }: any) => (
-            <CustomOverlayMap key={`sido-${sido}`} position={{ lat, lng }}>
-              <VStack
-                w={"85px"}
-                h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
-                textAlign={"center"}
-                color={"white"}
-                lineHeight={1.2}
-                justifyContent={"center"}
-                spacing={0}
-              >
-                <Box fontSize={"11px"}>{sido}</Box>
-                <Box fontSize={"12px"} fontWeight={"bold"}>
-                  25억
-                </Box>
-              </VStack>
-            </CustomOverlayMap>
-          ))}
-
+              </CustomOverlayMap>
+            );
+          })
+        )}
         {/* 현재 위치 마커 */}
         {currentLocation && (
           <MapMarker
@@ -372,6 +292,17 @@ export default function MapComponent() {
             placeholder="아파트, 지역 검색"
             borderRadius={24}
             borderColor={"#F37021"}
+            focusBorderColor="#FF9C60"
+            _focus={{
+              borderWidth: "1px",
+              borderColor: "#FF9C60",
+              boxShadow: "none",
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch(); // 엔터 키를 누르면 handleSearch 호출
+              }
+            }}
           />
           <InputRightAddon
             bg={"#F37021"}
@@ -380,6 +311,7 @@ export default function MapComponent() {
             borderColor={"#F37021"}
             px={3}
             onClick={handleSearch}
+            cursor={"pointer"}
           >
             <FaSearch size={16} color="#FFFFFF" />
           </InputRightAddon>

@@ -20,7 +20,12 @@ export interface AptData {
   lat: number;
   lng: number;
   name: string;
-  price: { min: number; max: number };
+  minAmount: number;
+  maxAmount: number;
+}
+
+interface AptResponse {
+  aptInfos: AptData[];
 }
 
 export interface DongAvgData {
@@ -47,15 +52,13 @@ export interface SidoAvgData {
 // API 요청 함수
 export const getApts = async (bounds: Bound): Promise<AptData[]> => {
   try {
-    const response = await axiosInstance.get<AptData[]>("/map", {
-      params: {
-        swLat: bounds.sw.lat,
-        swLng: bounds.sw.lng,
-        neLat: bounds.ne.lat,
-        neLng: bounds.ne.lng,
-      },
+    const response = await axiosInstance.post<AptResponse>("/apt/bound", {
+      bottomLat: bounds.sw.lat,
+      leftLng: bounds.sw.lng,
+      topLat: bounds.ne.lat,
+      rightLng: bounds.ne.lng,
     });
-    return response.data;
+    return response.data.aptInfos;
   } catch (error: any) {
     console.error("Failed to fetch apartments:", error.response?.data || error.message);
     throw new Error(error.response?.data || "Failed to fetch apartments");
@@ -64,13 +67,11 @@ export const getApts = async (bounds: Bound): Promise<AptData[]> => {
 
 export const getDongAvg = async (bounds: Bound): Promise<DongAvgData[]> => {
   try {
-    const response = await axiosInstance.get<DongAvgData[]>("/cityavg/dong", {
-      params: {
-        swLat: bounds.sw.lat,
-        swLng: bounds.sw.lng,
-        neLat: bounds.ne.lat,
-        neLng: bounds.ne.lng,
-      },
+    const response = await axiosInstance.post<DongAvgData[]>("/cityavg/dong", {
+      bottomLat: bounds.sw.lat,
+      leftLng: bounds.sw.lng,
+      topLat: bounds.ne.lat,
+      rightLng: bounds.ne.lng,
     });
     return response.data;
   } catch (error: any) {
@@ -81,13 +82,11 @@ export const getDongAvg = async (bounds: Bound): Promise<DongAvgData[]> => {
 
 export const getSigunguAvg = async (bounds: Bound): Promise<SigunguAvgData[]> => {
   try {
-    const response = await axiosInstance.get<SigunguAvgData[]>("/cityavg/sigungu", {
-      params: {
-        swLat: bounds.sw.lat,
-        swLng: bounds.sw.lng,
-        neLat: bounds.ne.lat,
-        neLng: bounds.ne.lng,
-      },
+    const response = await axiosInstance.post<SigunguAvgData[]>("/cityavg/sigungu", {
+      bottomLat: bounds.sw.lat,
+      leftLng: bounds.sw.lng,
+      topLat: bounds.ne.lat,
+      rightLng: bounds.ne.lng,
     });
     return response.data;
   } catch (error: any) {
