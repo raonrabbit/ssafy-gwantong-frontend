@@ -11,7 +11,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { ChatIcon, CloseIcon } from "@chakra-ui/icons";
-import { localAxios } from "../../../utils/http-commons";
+import { localAxios } from "../../../api/http-commons";
 
 const ChatbotButton: React.FC = () => {
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>(() => {
@@ -36,7 +36,7 @@ const ChatbotButton: React.FC = () => {
     setInput("");
 
     try {
-      const response = await axios.post<{ reply: string }>("/api/v1/chatbot", { message: input });
+      const response = await axios.post<{ reply: string }>("/chatbot", { message: input });
       console.log("Response:", response);
 
       const botMessage = { sender: "bot", text: response.data.reply };

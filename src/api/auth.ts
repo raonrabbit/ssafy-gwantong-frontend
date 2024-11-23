@@ -1,15 +1,10 @@
 import axios from "axios";
 import { ApiResponse, LoginApiResponse } from "../types/api";
+import { localAxios } from "./http-commons";
 
 const API_BASE_URL = "http://localhost:8080/api/auth";
 
-const axiosInstance = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://localhost:8080/api/v1/"
-      : "https://ezip.world/api/v1/",
-  withCredentials: true, // 쿠키도 같이 보내겠다는 뜻임. 로그인관련 세션아이디를 가져올수있음.
-});
+const axiosInstance = localAxios();
 
 interface userData {
   email: string;
