@@ -12,6 +12,7 @@ import KakaoCallback from "./components/pages/Login/KakaoCallback";
 import NoticesPage from "./routes/NoticesPage";
 import NoticeDetail from "./components/pages/Notice/NoticeDetails";
 import NoticeRegister from "./components/pages/Notice/NoticeRegister";
+import BookmarkPage from "./routes/BookmarkPage";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "mypage",
         element: <MyPage />,
+      },
+      {
+        path: "bookmark",
+        element: <BookmarkPage />,
       },
       {
         path: "login",
