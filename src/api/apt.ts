@@ -1,14 +1,6 @@
-import axios from "axios";
+import { localAxios } from "./http-commons";
 
-const API_BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8080/api/v1"
-    : "https://ezip.world/api/v1";
-
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-});
+const axiosInstance = localAxios();
 
 interface Bound {
   sw: { lat: number; lng: number };
