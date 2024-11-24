@@ -55,7 +55,7 @@ const apartmentDetails: Record<
 };
 
 export default function MapResult({ apartmentId }: MapResultProps) {
-  const apartment = apartmentDetails[apartmentId];
+  const apartment = apartmentDetails[1];
   const [searchValue, setSearchValue] = useState(apartment.name);
   const roadviewRef = useRef<HTMLDivElement>(null);
   const [isOn, setIsOn] = useState(true);

@@ -1,8 +1,19 @@
-import { Box, HStack, Input, InputGroup, InputRightAddon, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Input,
+  InputGroup,
+  InputRightAddon,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { FaSearch } from "react-icons/fa";
 import { MdArrowBack, MdClose } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { getAptInfosByName } from "../../../api/apt";
 
 interface MapSearchProps {
   searchQuery: string;
@@ -13,13 +24,12 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
   const [searchValue, setSearchValue] = useState(searchQuery);
   const navigate = useNavigate();
 
-  const apartments = [
-    { id: 1, name: "청담자이", details: "708세대 2011년 10월 입주" },
-    { id: 2, name: "청담힐", details: "30세대 1997년 4월 입주" },
-    { id: 3, name: "청담르엘", details: "1,261세대 2025년 11월 입주" },
-  ];
-
-  const filteredApartments = apartments.filter((apt) => apt.name.includes(searchQuery));
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["apartments", searchValue],
+    queryFn: () => getAptInfosByName(searchValue),
+    enabled: !!searchValue,
+    retry: 1,
+  });
 
   const handleSearch = () => {
     if (searchValue.trim() !== "") {
@@ -90,26 +100,39 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
       </HStack>
 
       {/* 검색 결과 */}
-      <VStack p={5} align={"start"}>
-        <Text fontSize={"14px"} color={"#F4945B"}>
+      <VStack py={5} align={"start"}>
+        <Text fontSize={"14px"} color={"#F4945B"} px={5}>
           아파트
         </Text>
-        {filteredApartments.map((apt) => (
-          <VStack
-            key={apt.id}
-            py={2}
-            align={"start"}
-            cursor="pointer"
-            onClick={() => onSelectApartment(apt)}
-          >
-            <Text fontSize={"16px"} color={"#333333"}>
-              {apt.name}
-            </Text>
-            <Text fontSize={"13px"} color={"#888888"}>
-              {apt.details}
-            </Text>
-          </VStack>
-        ))}
+        {isLoading ? (
+          <Skeleton height="20px" width="100%" />
+        ) : isError ? (
+          <Text color="red.500">검색 결과를 가져오는데 실패했습니다.</Text>
+        ) : data && data.length > 0 ? (
+          data.map((apt) => (
+            <VStack
+              px={5}
+              w={"100%"}
+              key={apt.id}
+              py={2}
+              align={"start"}
+              cursor="pointer"
+              onClick={() => onSelectApartment(apt)}
+              _hover={{
+                bg: "gray.200",
+              }}
+            >
+              <Text fontSize={"16px"} color={"#333333"}>
+                {apt.name}
+              </Text>
+              <Text fontSize={"13px"} color={"#888888"}>
+                {apt.name || "세부 정보 없음"}
+              </Text>
+            </VStack>
+          ))
+        ) : (
+          <Text color="gray.500">검색 결과가 없습니다.</Text>
+        )}
       </VStack>
     </Box>
   );

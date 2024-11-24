@@ -77,3 +77,17 @@ export const geCityDongAvg = async (bounds: Bound, type: string): Promise<CityAv
     throw new Error(error.response?.data || "Failed to fetch dong averages");
   }
 };
+
+export const getAptInfosByName = async (aptName: string): Promise<AptData[]> => {
+  try {
+    const response = await axiosInstance.get<AptResponse>("/apt/name", {
+      params: {
+        aptName,
+      },
+    });
+    return response.data.aptInfos;
+  } catch (error: any) {
+    console.error("Failed to fetch apartment information:", error.response?.data || error.message);
+    throw new Error(error.response?.data || "Failed to fetch apartment information");
+  }
+};
