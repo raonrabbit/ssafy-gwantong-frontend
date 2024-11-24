@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getApts, geCityDongAvg } from "../../../api/apt";
 import { MdMyLocation } from "react-icons/md";
 import { FaSearch } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface BoundPosition {
   lat: number;
@@ -26,6 +26,14 @@ interface Bound {
   ne: BoundPosition;
 }
 
+interface AptData {
+  lat: number;
+  lng: number;
+  name: string;
+  minAmount: number;
+  maxAmount: number;
+}
+
 export default function MapComponent() {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
@@ -33,6 +41,7 @@ export default function MapComponent() {
   const [zoomLevel, setZoomLevel] = useState<number>(3); // 초기 줌 레벨
   const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null); // 지도 인스턴스 저장
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null); // 현재 위치 저장
+  const [focusedApartment, setFocusedApartment] = useState<AptData | null>(null); // Store the focused apartment details
   const toast = useToast();
 
   // 데이터 fetch 함수
@@ -169,6 +178,64 @@ export default function MapComponent() {
     }
   };
 
+  const { id: apartmentId } = useParams<{ id: string }>(); // Extract apartmentId from URL
+
+  useEffect(() => {
+    if (apartmentId) {
+      console.log("apartmentId:", apartmentId);
+      setFocusedApartment({
+        lat: 37.5273578454093,
+        lng: 127.048456229401,
+        name: "청담힐",
+        minAmount: 2000000,
+        maxAmount: 3000000,
+      });
+      if (mapInstance && focusedApartment) {
+        const newCenter = new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng);
+        mapInstance.setCenter(newCenter); // Update map center
+        const overlay = new kakao.maps.CustomOverlay({
+          position: new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng),
+          content: `
+            <div style="
+              width: 56px;
+              height: 70px;
+              background-image: url('/images/apt_clicked.png');
+              background-size: cover;
+              background-repeat: no-repeat;
+              text-align: center;
+              color: #F37021;
+              z-index: 9999;">
+              <div style="line-height: 1.1; padding-top: 9px; font-size: 12px; font-weight: bold;">
+                ${
+                  focusedApartment.minAmount
+                    ? `${(focusedApartment.minAmount / 10000).toFixed(
+                        focusedApartment.minAmount >= 100000 ? 0 : 1
+                      )}억`
+                    : "N/A"
+                }
+              </div>
+              <div style="line-height: 1.1; font-size: 10px;">
+                ~${
+                  focusedApartment.maxAmount
+                    ? `${(focusedApartment.maxAmount / 10000).toFixed(
+                        focusedApartment.maxAmount >= 100000 ? 0 : 1
+                      )}억`
+                    : "N/A"
+                }
+              </div>
+            </div>`,
+          zIndex: 9999, // 포커싱된 마커의 zIndex 설정
+        });
+
+        overlay.setMap(mapInstance);
+
+        return () => {
+          overlay.setMap(null); // Clean up the overlay when component unmounts or data changes
+        };
+      }
+    }
+  }, [apartmentId, mapInstance]);
+
   return (
     <div
       style={{
@@ -190,6 +257,8 @@ export default function MapComponent() {
         {zoomLevel <= 4 &&
           data?.map((item: any, index: number) => {
             if (!item.lat || !item.lng) return null; // 유효하지 않은 좌표는 무시
+            if (item.lat === focusedApartment?.lat && item.lng === focusedApartment?.lng)
+              return null;
             return (
               <CustomOverlayMap
                 key={item.id || index}
@@ -201,7 +270,11 @@ export default function MapComponent() {
                 <Box
                   w={"56px"}
                   h={"70px"}
-                  backgroundImage={"images/apt_up1.png"}
+                  style={{
+                    backgroundImage: "url('/images/apt_up1.png')",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                  }}
                   textAlign={"center"}
                   color={"white"}
                 >
@@ -243,7 +316,11 @@ export default function MapComponent() {
               <VStack
                 w={"85px"}
                 h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
+                style={{
+                  backgroundImage: "url('/images/local_up2.png')",
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                }}
                 textAlign={"center"}
                 color={"white"}
                 lineHeight={1.2}
@@ -265,7 +342,11 @@ export default function MapComponent() {
               <VStack
                 w={"85px"}
                 h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
+                style={{
+                  backgroundImage: "url('/images/local_up2.png')",
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                }}
                 textAlign={"center"}
                 color={"white"}
                 lineHeight={1.2}
@@ -286,7 +367,11 @@ export default function MapComponent() {
               <VStack
                 w={"85px"}
                 h={"53px"}
-                backgroundImage={"/images/local_up2.png"}
+                style={{
+                  backgroundImage: "url('/images/local_up2.png')",
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                }}
                 textAlign={"center"}
                 color={"white"}
                 lineHeight={1.2}
@@ -311,6 +396,61 @@ export default function MapComponent() {
             }}
           ></MapMarker>
         )}
+
+        {/* 포커싱된 마커 */}
+        {/* {focusedApartment && (
+          <CustomOverlayMap
+            position={{
+              lat: focusedApartment.lat,
+              lng: focusedApartment.lng,
+            }}
+          >
+            <Box
+              w={"56px"}
+              h={"70px"}
+              textAlign={"center"}
+              color={"#F37021"}
+              style={{
+                backgroundImage: "url('/images/apt_clicked.png')",
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
+              }}
+            >
+              <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
+                {focusedApartment.minAmount
+                  ? `${(focusedApartment.minAmount / 10000).toFixed(
+                      focusedApartment.minAmount >= 100000 ? 0 : 1
+                    )}억`
+                  : "N/A"}
+              </Box>
+              <Box lineHeight={1.1} fontSize={"10px"}>
+                ~
+                {focusedApartment.maxAmount
+                  ? `${(focusedApartment.maxAmount / 10000).toFixed(
+                      focusedApartment.maxAmount >= 100000 ? 0 : 1
+                    )}억`
+                  : "N/A"}
+              </Box>
+              <Box
+                position="absolute"
+                bottom="-16px"
+                transform="translateX(-50%)"
+                left="50%"
+                fontSize="10px"
+                lineHeight="1.4"
+                color="white"
+                pb="1px"
+                px="3px"
+                opacity="0.8"
+                bg="rgb(96, 96, 96)"
+                overflow="hidden"
+                textOverflow="ellipsis"
+              >
+                {focusedApartment.name ?? "Unknown"}
+              </Box>
+            </Box>
+          </CustomOverlayMap>
+        )} */}
       </Map>
 
       {/* 줌 컨트롤 버튼 */}
