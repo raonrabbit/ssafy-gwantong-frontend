@@ -35,7 +35,7 @@ export default function HomeNoticeCard({ title, date, content }: NoticeCardProps
         </HStack>
 
         <Text fontSize={26} lineHeight={"76px"}>
-          {content}
+          {title}
         </Text>
       </Stack>
     </Box>

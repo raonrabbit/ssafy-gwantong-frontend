@@ -1,38 +1,27 @@
-import { Box, Grid, Heading, HStack, Stack, Text, VStack, Image } from "@chakra-ui/react";
-import { FaRegClipboard } from "react-icons/fa";
-import { IoIosPaper } from "react-icons/io";
+import { Grid, Heading, HStack, Stack, Text, VStack, Image } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import NoticeCard from "./HomeNoticeCard";
 import { Link } from "react-router-dom";
+import { getRecentNotices } from "../../../api/notice";
 
 type NoticeCardProps = {
   title: string;
-  date: string;
+  id: string;
   content: string;
+  createdAt: string;
 };
 
 export default function HomeNoticeList() {
-  const notices: NoticeCardProps[] = [
-    {
-      title: "공지사항",
-      date: "2024.11.06",
-      content: "이번주는 정말 힘든 하루인 것 같습니다.",
-    },
-    {
-      title: "공지사항",
-      date: "2024.11.04",
-      content: "vue는 너무 어려워요... 알고 계셨나요?",
-    },
-    {
-      title: "공지사항",
-      date: "2024.11.06",
-      content: "이번주는 정말 힘든 하루인 것 같습니다.",
-    },
-    {
-      title: "공지사항",
-      date: "2024.11.04",
-      content: "vue는 너무 어려워요... 알고 계셨나요?",
-    },
-  ];
+  // Fetch recent notices using React Query
+  const {
+    data: notices,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["recentNotices"],
+    queryFn: getRecentNotices,
+  });
 
   return (
     <VStack maxW={"1712px"} marginX={"auto"} align="stretch" mt={48} pb={48} gap={0}>
@@ -58,11 +47,11 @@ export default function HomeNoticeList() {
         w="full"
         mx="auto"
       >
-        {notices.map((notice, index) => (
+        {notices?.map((notice, index) => (
           <NoticeCard
             key={index}
             title={notice.title}
-            date={notice.date}
+            date={notice.createdAt}
             content={notice.content}
           />
         ))}
