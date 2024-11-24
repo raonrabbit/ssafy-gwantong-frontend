@@ -10,9 +10,12 @@ import MapSearchPage from "./routes/MapSearchPage";
 import MapResultPage from "./routes/MapResultPage";
 import KakaoCallback from "./components/pages/Login/KakaoCallback";
 import NoticesPage from "./routes/NoticesPage";
-import NoticeDetail from "./components/pages/Notice/NoticeDetails";
-import NoticeRegister from "./components/pages/Notice/NoticeRegister";
 import BookmarkPage from "./routes/BookmarkPage";
+import ProtectedRoute from "./components/pages/commons/ProtectedRoute";
+import NoticeRegister from "./routes/NoticeRegisterPage";
+import NoticeDetail from "./routes/NoticeDetailsPage";
+import ProtectedAuthorRoute from "./components/pages/commons/ProtectedAuthorRoute";
+import NoticeUpdate from "./routes/NoticeUpdatePage";
 
 const router = createBrowserRouter([
   {
@@ -64,11 +67,25 @@ const router = createBrowserRouter([
       },
       {
         path: "notices/register",
-        element: <NoticeRegister />,
+        element: (
+          <ProtectedRoute>
+            <NoticeRegister />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "notices/:id",
         element: <NoticeDetail />,
+      },
+      {
+        path: "notices/:id/edit",
+        element: (
+          <ProtectedRoute>
+            <ProtectedAuthorRoute>
+              <NoticeUpdate />
+            </ProtectedAuthorRoute>
+          </ProtectedRoute>
+        ),
       },
     ],
   },
