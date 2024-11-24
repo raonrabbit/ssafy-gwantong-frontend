@@ -20,11 +20,15 @@ interface AptResponse {
   aptInfos: AptData[];
 }
 
-export interface DongAvgData {
-  dong: string;
+export interface CityAvgData {
+  city: string;
   lat: number;
   lng: number;
-  avgPrice: number;
+  avg: number;
+}
+
+interface CityResponse {
+  cityAvgs: CityAvgData[];
 }
 
 export interface SigunguAvgData {
@@ -56,50 +60,20 @@ export const getApts = async (bounds: Bound): Promise<AptData[]> => {
     throw new Error(error.response?.data || "Failed to fetch apartments");
   }
 };
-
-export const getDongAvg = async (bounds: Bound): Promise<DongAvgData[]> => {
+export const geCityDongAvg = async (bounds: Bound, type: string): Promise<CityAvgData[]> => {
   try {
-    const response = await axiosInstance.post<DongAvgData[]>("/cityavg/dong", {
-      bottomLat: bounds.sw.lat,
-      leftLng: bounds.sw.lng,
-      topLat: bounds.ne.lat,
-      rightLng: bounds.ne.lng,
+    const response = await axiosInstance.get<CityResponse>(`/cityavg/${type}`, {
+      params: {
+        bottomLat: bounds.sw.lat,
+        leftLng: bounds.sw.lng,
+        topLat: bounds.ne.lat,
+        rightLng: bounds.ne.lng,
+      },
     });
-    return response.data;
+    console.log(response.data.cityAvgs);
+    return response.data.cityAvgs;
   } catch (error: any) {
     console.error("Failed to fetch dong averages:", error.response?.data || error.message);
     throw new Error(error.response?.data || "Failed to fetch dong averages");
-  }
-};
-
-export const getSigunguAvg = async (bounds: Bound): Promise<SigunguAvgData[]> => {
-  try {
-    const response = await axiosInstance.post<SigunguAvgData[]>("/cityavg/sigungu", {
-      bottomLat: bounds.sw.lat,
-      leftLng: bounds.sw.lng,
-      topLat: bounds.ne.lat,
-      rightLng: bounds.ne.lng,
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Failed to fetch sigungu averages:", error.response?.data || error.message);
-    throw new Error(error.response?.data || "Failed to fetch sigungu averages");
-  }
-};
-
-export const getSidoAvg = async (bounds: Bound): Promise<SidoAvgData[]> => {
-  try {
-    const response = await axiosInstance.get<SidoAvgData[]>("/cityavg/sido", {
-      params: {
-        swLat: bounds.sw.lat,
-        swLng: bounds.sw.lng,
-        neLat: bounds.ne.lat,
-        neLng: bounds.ne.lng,
-      },
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Failed to fetch sido averages:", error.response?.data || error.message);
-    throw new Error(error.response?.data || "Failed to fetch sido averages");
   }
 };

@@ -11,7 +11,7 @@ import {
 import { Map, CustomOverlayMap, MapMarker } from "react-kakao-maps-sdk";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getApts, getDongAvg, getSigunguAvg, getSidoAvg } from "../../../api/apt";
+import { getApts, geCityDongAvg } from "../../../api/apt";
 import { MdMyLocation } from "react-icons/md";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -39,9 +39,9 @@ export default function MapComponent() {
   const fetchMapData = async (): Promise<any[]> => {
     if (!bounds) return []; // Bounds가 없으면 빈 배열 반환
     if (zoomLevel <= 4) return await getApts(bounds);
-    if (zoomLevel === 5) return await getDongAvg(bounds);
-    if (zoomLevel >= 6 && zoomLevel <= 9) return await getSigunguAvg(bounds);
-    return await getSidoAvg(bounds);
+    if (zoomLevel === 5) return await geCityDongAvg(bounds, "dong");
+    if (zoomLevel >= 6 && zoomLevel <= 9) return await geCityDongAvg(bounds, "gu");
+    return await geCityDongAvg(bounds, "si");
   };
 
   // React Query 사용
@@ -187,12 +187,7 @@ export default function MapComponent() {
           kakao.maps.event.addListener(map, "idle", () => onIdle(map));
         }}
       >
-        {/* Skeleton UI */}
-        {isLoading ? (
-          <Skeleton height="100px" width="100%" />
-        ) : isError ? (
-          <Box>데이터를 가져오는데 실패했습니다.</Box>
-        ) : (
+        {zoomLevel <= 4 &&
           data?.map((item: any, index: number) => {
             if (!item.lat || !item.lng) return null; // 유효하지 않은 좌표는 무시
             return (
@@ -211,10 +206,15 @@ export default function MapComponent() {
                   color={"white"}
                 >
                   <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
-                    {item.minAmount ?? "N/A"}
+                    {item.minAmount
+                      ? `${(item.minAmount / 10000).toFixed(item.minAmount >= 100000 ? 0 : 1)}억`
+                      : "N/A"}
                   </Box>
                   <Box lineHeight={1.1} fontSize={"10px"}>
-                    ~{item.maxAmount ?? "N/A"}
+                    ~
+                    {item.maxAmount
+                      ? `${(item.maxAmount / 10000).toFixed(item.maxAmount >= 100000 ? 0 : 1)}억`
+                      : "N/A"}
                   </Box>
                   <Box
                     position="absolute"
@@ -236,8 +236,71 @@ export default function MapComponent() {
                 </Box>
               </CustomOverlayMap>
             );
-          })
-        )}
+          })}
+        {zoomLevel === 5 &&
+          data?.map(({ lat, lng, city, avg }: any) => (
+            <CustomOverlayMap key={`dong-${city}`} position={{ lat, lng }}>
+              <VStack
+                w={"85px"}
+                h={"53px"}
+                backgroundImage={"/images/local_up2.png"}
+                textAlign={"center"}
+                color={"white"}
+                lineHeight={1.2}
+                justifyContent={"center"}
+                spacing={0}
+              >
+                <Box fontSize={"11px"}>{city}</Box>
+                <Box fontSize={"12px"} fontWeight={"bold"}>
+                  {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                </Box>
+              </VStack>
+            </CustomOverlayMap>
+          ))}
+
+        {zoomLevel >= 6 &&
+          zoomLevel <= 9 &&
+          data?.map(({ lat, lng, city, avg }: any) => (
+            <CustomOverlayMap key={`gu-${city}`} position={{ lat, lng }}>
+              <VStack
+                w={"85px"}
+                h={"53px"}
+                backgroundImage={"/images/local_up2.png"}
+                textAlign={"center"}
+                color={"white"}
+                lineHeight={1.2}
+                justifyContent={"center"}
+                spacing={0}
+              >
+                <Box fontSize={"11px"}>{city}</Box>
+                <Box fontSize={"12px"} fontWeight={"bold"}>
+                  {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                </Box>
+              </VStack>
+            </CustomOverlayMap>
+          ))}
+
+        {zoomLevel >= 10 &&
+          data?.map(({ lat, lng, city, avg }: any) => (
+            <CustomOverlayMap key={`si-${city}`} position={{ lat, lng }}>
+              <VStack
+                w={"85px"}
+                h={"53px"}
+                backgroundImage={"/images/local_up2.png"}
+                textAlign={"center"}
+                color={"white"}
+                lineHeight={1.2}
+                justifyContent={"center"}
+                spacing={0}
+              >
+                <Box fontSize={"11px"}>{city}</Box>
+                <Box fontSize={"12px"} fontWeight={"bold"}>
+                  {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                </Box>
+              </VStack>
+            </CustomOverlayMap>
+          ))}
+
         {/* 현재 위치 마커 */}
         {currentLocation && (
           <MapMarker
