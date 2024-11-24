@@ -1,66 +1,91 @@
-import { Box, Stack, Text, Image, useColorModeValue, Button, HStack } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { Box, Stack, Text, Image, Button, HStack, useColorModeValue } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { getNotices } from "../../../api/notice";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-interface NoticeItem {
-  date: string;
-  title: string;
-  tags: string[];
-  imageUrl?: string;
+interface Author {
+  active: boolean;
+  admin: boolean;
+  createdAt: string;
+  email: string;
+  id: number;
+  nickname: string;
+  profileImageUrl: string;
+  role: string;
+  status: string;
+  updatedAt: string;
 }
 
-const notices: NoticeItem[] = [
-  {
-    date: "2024.11.19",
-    title: "카카오, 비즈니스 연속성 경영시스템 'ISO 22301' 인증 획득",
-    tags: ["#인프라", "#비즈니스연속성", "#ISO", "#국제인증"],
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    date: "2024.11.18",
-    title: "카카오톡 선물하기, 이탈리아 명품 브랜드 '프라다' 신규 입점",
-    tags: ["#카카오톡 선물하기", "#선물하기 Lux", "#프라다 입점"],
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    date: "2024.11.18",
-    title: "카카오, '베이비춘식이' 크리스마스 굿즈 출시",
-    tags: ["#카카오프렌즈", "#춘식이", "#크리스마스 굿즈"],
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    date: "2024.11.13",
-    title: "카카오 준법감시위원회, '투자 및 감사 준칙' 정립 발표",
-    tags: ["#준법감시위원회", "#투자 및 감사 준칙"],
-    imageUrl: "https://via.placeholder.com/150",
-  },
-  {
-    date: "2024.11.13",
-    title: "최애와 카카오톡 오픈채팅에서 소통해요! 팬미팅 '팬톡회' 3회 진행",
-    tags: ["#팬톡회", "#카카오톡 오픈채팅", "#팬과의 소통"],
-    imageUrl: "https://via.placeholder.com/150",
-  },
-];
+interface Notice {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  title: string;
+  content: string;
+  author: Author;
+}
 
 const NoticeList = () => {
+  const [page, setPage] = useState(1); // 페이지 상태
+  const [notices, setNotices] = useState<Notice[]>([]); // 공지사항 목록 상태
+  const [hasMore, setHasMore] = useState(true);
+
   const boxBgColor = useColorModeValue("white", "gray.700");
   const bgColor = useColorModeValue("gray.50", "gray.800");
-  const color = useColorModeValue("gray.500", "white");
   const buttonColor = useColorModeValue("#1F1F1F", "gray.600");
+  const hoverColor = useColorModeValue("blackAlpha.700", "gray.400");
+
+  // Check token and user from localStorage
+  const localStorageToken = localStorage.getItem("token");
+  const localStorageUser = localStorage.getItem("user");
+
+  // Check token and user from Redux
+  const reduxToken = useSelector((state: any) => state.auth?.token);
+  const reduxUser = useSelector((state: any) => state.auth?.user);
+
+  // Determine authentication status
+  const isAuthenticated = Boolean(localStorageToken || localStorageUser || reduxToken || reduxUser);
+
+  const { data, isLoading, isError, error, isFetching } = useQuery({
+    queryKey: ["notices", page],
+    queryFn: () => getNotices(page),
+    staleTime: 5 * 60 * 1000, // 데이터 캐시 유효 시간: 5분
+  });
+
+  // 데이터를 가져올 때 상태 업데이트
+  useEffect(() => {
+    if (data) {
+      setNotices((prev) => (page === 1 ? data : [...prev, ...data]));
+      if (data.length === 0) setHasMore(false);
+    }
+  }, [data, page]);
+
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1); // 페이지 증가
+  };
+
+  if (isLoading && page === 1) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error: {error?.message}</Text>;
+
   return (
     <Box maxWidth="1296px" mx="auto" mt={5} p={5} bgColor={boxBgColor} borderRadius={"24px"}>
       <HStack justifyContent={"space-between"}>
         <Text fontSize="2xl" fontWeight="bold">
           공지사항
         </Text>
-        <Link to={`/notices/register`}>
-          <Text fontSize={"14px"}>등록하기</Text>
-        </Link>
+        {isAuthenticated && (
+          <Link to={`/notices/register`}>
+            <Text fontSize={"14px"}>등록하기</Text>
+          </Link>
+        )}
       </HStack>
       <Stack spacing={0}>
-        {notices.map((notice, index) => (
-          <Link to={`/notices/${index}`}>
+        {notices.map((notice) => (
+          <Link to={`/notices/${notice.id}`} key={notice.id}>
             <Stack
-              key={index}
+              key={notice.id}
               direction="row"
               alignItems="center"
               spacing={4}
@@ -69,49 +94,49 @@ const NoticeList = () => {
               py={4}
               _hover={{
                 bgColor: bgColor,
-                color: color,
               }}
             >
-              {notice.imageUrl && (
-                <Image
-                  src={notice.imageUrl}
-                  alt={notice.title}
-                  boxSize="100px"
-                  objectFit="cover"
-                  borderRadius="md"
-                />
-              )}
+              <Image
+                src={`https://via.placeholder.com/150?text=${notice.title}`} // Placeholder 이미지
+                alt={notice.title}
+                boxSize="100px"
+                objectFit="cover"
+                borderRadius="md"
+              />
               <Box>
                 <Text fontSize="sm" color="gray.500" mb={1}>
-                  {notice.date}
+                  {new Date(notice.createdAt).toLocaleDateString()}
                 </Text>
                 <Text fontSize="lg" fontWeight="bold" mb={1}>
                   {notice.title}
                 </Text>
-                <Stack direction="row" spacing={2}>
-                  {notice.tags.map((tag, tagIndex) => (
-                    <Text key={tagIndex} fontSize="sm" color="blue.500">
-                      {tag}
-                    </Text>
-                  ))}
-                </Stack>
+                <Text fontSize="sm" color="gray.600" noOfLines={2}>
+                  {notice.content}
+                </Text>
               </Box>
             </Stack>
           </Link>
         ))}
       </Stack>
-      <HStack justifyContent={"space-between"} mt={5}>
-        <Button
-          borderRadius={24}
-          backgroundColor={buttonColor}
-          size="lg"
-          mx="auto"
-          color={"white"}
-          w={"200px"}
-        >
-          더보기
-        </Button>
-      </HStack>
+      {hasMore && (
+        <HStack justifyContent={"space-between"} mt={5}>
+          <Button
+            borderRadius={24}
+            backgroundColor={buttonColor}
+            size="lg"
+            mx="auto"
+            color={"white"}
+            w={"200px"}
+            _hover={{
+              backgroundColor: hoverColor,
+            }}
+            onClick={handleLoadMore}
+            isLoading={isFetching}
+          >
+            더보기
+          </Button>
+        </HStack>
+      )}
     </Box>
   );
 };

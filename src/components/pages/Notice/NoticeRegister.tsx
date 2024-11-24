@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   FormControl,
@@ -10,14 +10,17 @@ import {
   Heading,
   useToast,
 } from "@chakra-ui/react";
+import { saveNotice } from "../../../api/notice"; // Import the saveNotice API function
+import { useNavigate } from "react-router-dom";
 
 const NoticeRegister = () => {
   const toast = useToast();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // 데이터를 수집하고 서버로 전송
     const formData = new FormData(event.target as HTMLFormElement);
     const title = formData.get("title") as string;
     const content = formData.get("content") as string;
@@ -33,15 +36,28 @@ const NoticeRegister = () => {
       return;
     }
 
-    // 서버로 전송하는 로직 (임시)
-    console.log({ title, content });
-    toast({
-      title: "등록 성공",
-      description: "공지사항이 성공적으로 등록되었습니다.",
-      status: "success",
-      duration: 3000,
-      isClosable: true,
-    });
+    try {
+      setIsSubmitting(true); // Start loading
+      await saveNotice(title, content); // Save notice via API
+      toast({
+        title: "등록 성공",
+        description: "공지사항이 성공적으로 등록되었습니다.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      navigate("/notices"); // Navigate to the notices page
+    } catch (error: any) {
+      toast({
+        title: "등록 실패",
+        description: error.message || "공지사항 등록 중 문제가 발생했습니다.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false); // Stop loading
+    }
   };
 
   return (
@@ -69,7 +85,13 @@ const NoticeRegister = () => {
             />
           </FormControl>
 
-          <Button type="submit" colorScheme="blue" size="lg" w="full">
+          <Button
+            type="submit"
+            colorScheme="blue"
+            size="lg"
+            w="full"
+            isLoading={isSubmitting} // Show loading state
+          >
             등록하기
           </Button>
         </Stack>

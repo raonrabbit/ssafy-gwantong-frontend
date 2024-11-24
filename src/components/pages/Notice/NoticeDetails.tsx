@@ -8,58 +8,121 @@ import {
   Divider,
   IconButton,
   HStack,
+  Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getNotice, deleteNotice } from "../../../api/notice";
 import { FaFacebook, FaTwitter, FaLink } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { useState } from "react";
+import NoticeDeleteModal from "./NoticeDeleteModal";
 
-interface NoticeDetailProps {
-  date: string;
-  title: string;
-  imageUrl: string;
-  content: string;
-  tags: string[];
-}
-
-const dummyData: NoticeDetailProps = {
-  date: "2024년 11월 18일",
-  title: "카카오, '베이비춘식이' 크리스마스 굿즈 출시",
-  imageUrl: "https://via.placeholder.com/800x400", // 실제 이미지 URL로 변경
-  content: `카카오프렌즈가 ‘베이비춘식이’ 크리스마스 굿즈를 새롭게 출시했다고 18일 밝혔다.
-  
-  이번 굿즈는 크리스마스를 맞아 출시된 특별한 라인업으로, 다양한 캐릭터와 소품을 활용하여 귀여운 느낌을 강조한 제품들로 구성됐다. 특히, 크리스마스 트리 장식 세트, 캐릭터 인형, 그리고 겨울 테마의 데코 아이템 등으로 카카오프렌즈의 독창적인 매력을 담았다.
-  
-  카카오프렌즈 관계자는 "이번 베이비춘식이 크리스마스 굿즈는 고객들에게 따뜻한 크리스마스 분위기를 전할 수 있는 좋은 아이템"이라며, "특히 크리스마스 시즌 선물로 많은 사랑을 받을 것으로 기대된다"고 전했다.
-  
-  해당 굿즈는 카카오프렌즈 공식 스토어와 주요 온라인 마켓에서 구매 가능하며, 12월 25일까지 한정 판매 예정이다.`,
-  tags: ["#카카오프렌즈", "#춘식이", "#크리스마스 굿즈"],
-};
-
-const NoticeDetail = () => {
+const NoticeDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // 공지사항 ID 가져오기 (라우팅 필요)
+  const toast = useToast();
+  const { id } = useParams<{ id: string }>(); // Get the notice ID from the URL
+  const [isModalOpen, setModalOpen] = useState(false);
 
-  // 실제로는 ID를 기반으로 데이터를 API에서 가져오거나 React Query로 관리
-  const { date, title, imageUrl, content, tags } = dummyData;
+  // Fetch user object from Redux once
+  const user = useSelector((state: any) => state.auth?.user);
 
+  // Safely extract email from user
+  const reduxUserEmail = user?.email || "";
+
+  // Fetch notice details
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["notice", id], // React Query cache key
+    queryFn: () => getNotice(Number(id)), // API call
+    enabled: !!id, // Execute only if ID is present
+  });
+
+  // Delete notice mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteNotice(Number(id)),
+    onSuccess: () => {
+      toast({
+        title: "삭제 성공",
+        description: "공지사항이 성공적으로 삭제되었습니다.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      navigate("/notices");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "삭제 실패",
+        description: error?.message || "공지사항 삭제 중 문제가 발생했습니다.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    },
+  });
+
+  const handleDelete = () => {
+    deleteMutation.mutate();
+    setModalOpen(false);
+  };
+
+  if (isLoading) {
+    return (
+      <Box mt="88px" textAlign="center">
+        <Spinner size="xl" />
+        <Text mt={4}>Loading...</Text>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box mt="88px" textAlign="center">
+        <Text color="red.500">Failed to load notice details.</Text>
+        <Text>{(error as Error).message}</Text>
+        <Button mt={4} onClick={() => navigate(-1)} colorScheme="gray" variant="outline">
+          Go Back
+        </Button>
+      </Box>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Box mt="88px" textAlign="center">
+        <Text color="red.500">Notice not found.</Text>
+        <Button mt={4} onClick={() => navigate(-1)} colorScheme="gray" variant="outline">
+          Go Back
+        </Button>
+      </Box>
+    );
+  }
+  const canEdit = data?.author.email === reduxUserEmail;
   return (
     <Box mt="88px" maxWidth="800px" mx="auto" px={4} textAlign="center">
       <Heading as="h1" fontSize="3xl" mb={2}>
-        {title}
+        {data.title}
       </Heading>
       <Text fontSize="sm" color="gray.500" mb={4}>
-        뉴스 | {date}
+        뉴스 | {new Date(data.createdAt).toLocaleDateString()}
       </Text>
 
-      <Image src={imageUrl} alt={title} borderRadius="md" mb={6} />
+      <Image
+        src={"https://via.placeholder.com/800x400"} // Placeholder image
+        alt={data.title}
+        borderRadius="md"
+        mb={6}
+      />
 
       <Box textAlign="left" lineHeight="1.8" mb={6}>
-        <Text>{content}</Text>
+        <Text>{data.content}</Text>
       </Box>
 
       <Divider mb={6} />
 
       <HStack justifyContent="center" spacing={4} mb={6}>
-        {tags.map((tag, index) => (
+        {data.tags?.map((tag, index) => (
           <Text key={index} fontSize="sm" color="blue.500">
             {tag}
           </Text>
@@ -86,17 +149,43 @@ const NoticeDetail = () => {
           borderRadius="full"
         />
       </HStack>
+      <HStack justifyContent={canEdit ? "space-between" : "center"}>
+        {canEdit && ( // Show "수정하기" button if the user can edit
+          <HStack>
+            {" "}
+            <Button
+              colorScheme="blue"
+              variant="solid"
+              borderRadius="md"
+              onClick={() => navigate(`/notices/${id}/edit`)} // Navigate to the edit page
+            >
+              수정하기
+            </Button>
+            <Button colorScheme="red" borderRadius={"md"} onClick={() => setModalOpen(true)}>
+              삭제하기
+            </Button>
+          </HStack>
+        )}
 
-      <Button
-        onClick={() => navigate(-1)} // 이전 페이지로 이동
-        colorScheme="gray"
-        variant="outline"
-        borderRadius="md"
-      >
-        목록으로 돌아가기
-      </Button>
+        <Button
+          onClick={() => navigate(-1)} // Navigate back
+          colorScheme="gray"
+          variant="outline"
+          borderRadius="md"
+        >
+          목록으로 돌아가기
+        </Button>
+      </HStack>
+
+      {/* Delete Confirmation Modal */}
+      <NoticeDeleteModal
+        isOpen={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleDelete}
+        isLoading={deleteMutation.isPending}
+      />
     </Box>
   );
 };
 
-export default NoticeDetail;
+export default NoticeDetails;
