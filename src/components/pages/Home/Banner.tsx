@@ -29,7 +29,6 @@ export default function Banner() {
       pt={6}
       mt={{ sm: "40px", md: "0px" }}
       alignItems={{ sm: "center" }}
-      spacing={0}
       justifyContent={"space-between"}
     >
       <Box
