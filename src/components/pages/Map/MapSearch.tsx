@@ -7,6 +7,7 @@ import {
   Skeleton,
   Text,
   VStack,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +24,11 @@ interface MapSearchProps {
 export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchProps) {
   const [searchValue, setSearchValue] = useState(searchQuery);
   const navigate = useNavigate();
+
+  // 다크모드 적용
+  const backgroundColor = useColorModeValue("gray.100", "gray.700");
+  const searchBoxColor = useColorModeValue("#FFFFFF", "gray.600");
+  const nameColor = useColorModeValue("#333333", "#999999");
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["apartments", searchValue],
@@ -48,7 +54,7 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
       top={"0"}
       minW={"358px"}
       minH={"calc(100vh - 88px)"}
-      bg={"gray.100"}
+      bg={backgroundColor}
       zIndex={1}
       overflowY={"auto"}
     >
@@ -58,7 +64,7 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
           placeholder="아파트, 지역 검색"
           borderRadius={24}
           borderColor={"#F37021"}
-          bg={"white"}
+          bg={searchBoxColor}
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           focusBorderColor="#FF9C60"
@@ -130,7 +136,7 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
                 bg: "gray.200",
               }}
             >
-              <Text fontSize={"16px"} color={"#333333"}>
+              <Text fontSize={"16px"} color={nameColor}>
                 {apt.name}
               </Text>
               <Text fontSize={"13px"} color={"#888888"}>

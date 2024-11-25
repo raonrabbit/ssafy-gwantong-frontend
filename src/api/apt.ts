@@ -16,8 +16,12 @@ export interface AptData {
   maxAmount: number;
 }
 
-interface AptResponse {
+interface AptsResponse {
   aptInfos: AptData[];
+}
+
+interface AptResponse {
+  aptInfo: AptData;
 }
 
 export interface CityAvgData {
@@ -45,10 +49,41 @@ export interface SidoAvgData {
   avgPrice: number;
 }
 
+// 단일 거래 정보 인터페이스
+interface TradeDetail {
+  date: string; // 거래 날짜
+  size: number; // 면적
+  price: number; // 가격
+  floor: string; // 층수
+}
+
+// 평균 가격 정보 인터페이스
+interface GraphData {
+  yearMonth: string; // 연월 정보 (예: "21.12")
+  averagePrice: number; // 평균 가격
+  isMaxMinPrice: string; // "최고" 또는 "최소" (선택적 필드)
+}
+
+// 아파트 상세 정보 인터페이스
+interface ApartmentDetail {
+  aptId: string; // 아파트 ID
+  aptName: string; // 아파트 이름
+  aptAddress: string; // 아파트 주소
+  sizes: number[]; // 면적 배열
+  threeYearAveragePrice: number; // 3년 평균 가격
+  oneMonthAveragePrice: number; // 실거래 기준 1개월 평균 가격
+  graphData: GraphData[]; // 연월별 평균 가격 데이터
+  tradeDetails: TradeDetail[]; // 거래 내역 데이터
+  aiPredictedPrice: number; // AI 예측 가격
+  aiPriceChangePercent: number; // AI 예측 가격 변동률
+  monthComparisonPrice: number; // 1개월 전 가격
+  monthComparisonPercent: number; // 1개월 전 가격 변동률
+}
+
 // API 요청 함수
 export const getApts = async (bounds: Bound): Promise<AptData[]> => {
   try {
-    const response = await axiosInstance.get<AptResponse>("/apt/bound", {
+    const response = await axiosInstance.get<AptsResponse>("/apt/bound", {
       params: {
         bottomLat: bounds.sw.lat,
         leftLng: bounds.sw.lng,
@@ -72,7 +107,6 @@ export const geCityDongAvg = async (bounds: Bound, type: string): Promise<CityAv
         rightLng: bounds.ne.lng,
       },
     });
-    console.log(response.data.cityAvgs);
     return response.data.cityAvgs;
   } catch (error: any) {
     console.error("Failed to fetch dong averages:", error.response?.data || error.message);
@@ -82,7 +116,7 @@ export const geCityDongAvg = async (bounds: Bound, type: string): Promise<CityAv
 
 export const getAptInfosByName = async (aptName: string): Promise<AptData[]> => {
   try {
-    const response = await axiosInstance.get<AptResponse>("/apt/name", {
+    const response = await axiosInstance.get<AptsResponse>("/apt/name", {
       params: {
         aptName,
       },
@@ -91,5 +125,33 @@ export const getAptInfosByName = async (aptName: string): Promise<AptData[]> => 
   } catch (error: any) {
     console.error("Failed to fetch apartment information:", error.response?.data || error.message);
     throw new Error(error.response?.data || "Failed to fetch apartment information");
+  }
+};
+
+export const getAptFocusById = async (aptId: string): Promise<AptData> => {
+  try {
+    const response = await axiosInstance.get<AptResponse>("/apt/focus", {
+      params: {
+        aptId,
+      },
+    });
+    return response.data.aptInfo;
+  } catch (error: any) {
+    console.error("Failed to fetch focused apartment:", error.response?.data || error.message);
+    throw new Error(error.response?.data || "Failed to fetch focused apartment");
+  }
+};
+
+export const getAptDetailById = async (aptId: string) => {
+  try {
+    const response = await axiosInstance.get<ApartmentDetail>("/apt/detail", {
+      params: {
+        aptId,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to fetch focused apartment:", error.response?.data || error.message);
+    throw new Error(error.response?.data || "Failed to fetch focused apartment");
   }
 };

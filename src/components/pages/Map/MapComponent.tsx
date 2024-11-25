@@ -1,20 +1,26 @@
 import {
   Box,
   Button,
+  HStack,
   Input,
   InputGroup,
   InputRightAddon,
   Skeleton,
   useToast,
   VStack,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { Map, CustomOverlayMap, MapMarker, Polyline } from "react-kakao-maps-sdk";
-import { useState, useEffect } from "react";
+import { Map, CustomOverlayMap, MapMarker, Polyline, Polygon } from "react-kakao-maps-sdk";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getApts, geCityDongAvg } from "../../../api/apt";
+import { getApts, geCityDongAvg, getAptFocusById } from "../../../api/apt";
 import { MdMyLocation } from "react-icons/md";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaSnowflake } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
+import { PiOpenAiLogo } from "react-icons/pi";
+import { FaFire } from "react-icons/fa";
+import polygonData from "./TL_SCCO_SIG.json";
+import { MdClose } from "react-icons/md";
 
 interface BoundPosition {
   lat: number;
@@ -27,6 +33,7 @@ interface Bound {
 }
 
 interface AptData {
+  id: string;
   lat: number;
   lng: number;
   name: string;
@@ -44,13 +51,21 @@ export default function MapComponent() {
   const [focusedApartment, setFocusedApartment] = useState<AptData | null>(null); // Store the focused apartment details
   const toast = useToast();
 
+  // 다크모드 적용
+  const backgroundColor = useColorModeValue("#FFFFFF", "gray.600");
+
   // 데이터 fetch 함수
   const fetchMapData = async (): Promise<any[]> => {
     if (!bounds) return []; // Bounds가 없으면 빈 배열 반환
-    if (zoomLevel <= 4) return await getApts(bounds);
-    if (zoomLevel === 5) return await geCityDongAvg(bounds, "dong");
+    if (zoomLevel <= 3) return await getApts(bounds);
+    if (zoomLevel >= 4 && zoomLevel <= 5) return await geCityDongAvg(bounds, "dong");
     if (zoomLevel >= 6 && zoomLevel <= 9) return await geCityDongAvg(bounds, "gu");
     return await geCityDongAvg(bounds, "si");
+  };
+
+  const onApartmentClick = (apartmentId: string, event: any) => {
+    event.stopPropagation();
+    navigate(`/map/apt/${apartmentId}`);
   };
 
   // React Query 사용
@@ -244,15 +259,35 @@ export default function MapComponent() {
   const { id: apartmentId } = useParams<{ id: string }>(); // Extract apartmentId from URL
 
   useEffect(() => {
-    if (apartmentId) {
-      setFocusedApartment({
-        lat: 37.5273578454093,
-        lng: 127.048456229401,
-        name: "청담힐",
-        minAmount: 2000000,
-        maxAmount: 3000000,
-      });
-    }
+    const fetchFocusedApartment = async () => {
+      if (apartmentId) {
+        console.log();
+        try {
+          const focusedApt = await getAptFocusById(apartmentId); // await 사용
+          setFocusedApartment(focusedApt); // 상태 업데이트
+
+          // 요청 성공 시 알림
+          toast({
+            title: "아파트 정보 로드 성공",
+            description: `${focusedApt.name} 정보가 성공적으로 로드되었습니다.`,
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+        } catch (error: any) {
+          // 요청 실패 시 알림
+          toast({
+            title: "아파트 정보 로드 실패",
+            description: error.response?.data?.message || "아파트 정보를 불러오는 데 실패했습니다.",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      }
+    };
+
+    fetchFocusedApartment();
   }, [apartmentId, mapInstance]); // apartmentId나 mapInstance가 변경될 때만 실행
 
   useEffect(() => {
@@ -262,6 +297,7 @@ export default function MapComponent() {
       const overlay = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng),
         content: `
+        
             <div style="
               width: 56px;
               height: 70px;
@@ -270,7 +306,50 @@ export default function MapComponent() {
               background-repeat: no-repeat;
               text-align: center;
               color: #F37021;
-              z-index: 9999;">
+              z-index: 9999;
+              animation: bounce 2s infinite;">
+            <!-- HStack 1 -->
+              <div style="
+                position: absolute;
+                top: -54px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #10a37f;
+                border-radius: 8px;
+                padding: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                width: 68px;
+              ">
+                <img src="/images/SiOpenai.svg" alt="OpenAI Logo" style="width: 16px; height: 16px;" />
+                <span style="font-size: 12px; font-weight: bold; color: white; margin-left: 4px;">
+                  +2.5%
+                </span>
+              </div>
+              
+              <!-- HStack 2 -->
+              <div style="
+                position: absolute;
+                top: -26px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f2f2f2;
+                border-radius: 8px;
+                padding: 4px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                width: 68px;
+              ">
+                <img src="/images/FaFire.svg" alt="Fire Icon" style="width: 16px; height: 16px;" />
+                <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
+                  +2.5%
+                </span>
+              </div>
+
               <div style="line-height: 1.1; padding-top: 9px; font-size: 12px; font-weight: bold;">
                 ${
                   focusedApartment.minAmount
@@ -289,7 +368,26 @@ export default function MapComponent() {
                     : "N/A"
                 }
               </div>
-            </div>`,
+              <div style="
+                position: absolute;
+                bottom: -16px;
+                transform: translateX(-50%);
+                left: 50%;
+                font-size: 10px;
+                line-height: 1.4;
+                color: white;
+                padding-bottom: 1px;
+                padding-left: 3px;
+                padding-right: 3px;
+                opacity: 0.8;
+                background: rgb(96, 96, 96);
+                overflow: hidden;
+                text-overflow: ellipsis;
+              ">
+                ${focusedApartment.name ?? "Unknown"}
+              </div>
+            </div>
+            `,
         zIndex: 9999,
       });
 
@@ -327,6 +425,59 @@ export default function MapComponent() {
     if (value <= minValue + range * 2) return 2;
     if (value <= minValue + range * 3) return 3;
     return 4;
+  };
+
+  // 폴리곤 데이터 렌더링 함수
+  const renderPolygons = (mapInstance: kakao.maps.Map) => {
+    if (zoomLevel < 6 || zoomLevel > 9) return null;
+
+    return polygonData.features.map((feature: any, index: number) => {
+      const { coordinates } = feature.geometry;
+      const { SIG_KOR_NM } = feature.properties;
+
+      // 좌표 변환
+      const path = coordinates[0].map(([lng, lat]: [number, number]) => ({
+        lat,
+        lng,
+      }));
+
+      // 중심 좌표 계산
+      const center = path.reduce(
+        (acc: BoundPosition, point: BoundPosition) => ({
+          lat: acc.lat + point.lat / path.length,
+          lng: acc.lng + point.lng / path.length,
+        }),
+        { lat: 0, lng: 0 }
+      );
+
+      return (
+        <React.Fragment key={index}>
+          {/* 폴리곤 추가 */}
+          <Polygon
+            path={path}
+            strokeWeight={2}
+            strokeColor="#004c80"
+            strokeOpacity={0.8}
+            fillColor="#aadaff"
+            fillOpacity={0.7}
+          />
+          {/* 지역 이름 표시 */}
+          <CustomOverlayMap position={center}>
+            <Box
+              bg="white"
+              borderRadius="8px"
+              p="4px"
+              fontSize="12px"
+              fontWeight="bold"
+              textAlign="center"
+              boxShadow="0px 2px 4px rgba(0,0,0,0.25)"
+            >
+              {SIG_KOR_NM}
+            </Box>
+          </CustomOverlayMap>
+        </React.Fragment>
+      );
+    });
   };
 
   return (
@@ -377,11 +528,57 @@ export default function MapComponent() {
           </CustomOverlayMap>
         )}
 
-        {zoomLevel <= 4 &&
+        {zoomLevel <= 3 &&
           data?.map((item: any, index: number) => {
             if (!item.lat || !item.lng) return null; // 유효하지 않은 좌표는 무시
             if (item.lat === focusedApartment?.lat && item.lng === focusedApartment?.lng)
               return null;
+
+            if (!item.minAmount && !item.maxAmount) {
+              return (
+                <CustomOverlayMap
+                  key={item.id || index}
+                  position={{
+                    lat: item.lat,
+                    lng: item.lng,
+                  }}
+                >
+                  <Box
+                    w={"28px"}
+                    h={"35px"}
+                    style={{
+                      backgroundImage: 'url("/images/apt_up1.png")',
+                      backgroundSize: "cover",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                    textAlign={"center"}
+                    color={"white"}
+                  >
+                    <Box position="absolute" top="50%" transform="translate(-50%, -50%)" left="50%">
+                      <MdClose size={36} color="#4A5568" />
+                    </Box>
+                    <Box
+                      position="absolute"
+                      bottom="-16px"
+                      transform="translateX(-50%)"
+                      left="50%"
+                      fontSize="10px"
+                      lineHeight="1.4"
+                      color="white"
+                      pb="1px"
+                      px="3px"
+                      opacity="0.8"
+                      bg="rgb(96, 96, 96)"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                    >
+                      {item.name ?? "Unknown"}
+                    </Box>
+                  </Box>
+                </CustomOverlayMap>
+              );
+            }
+
             const level = getLevel(item.maxAmount);
             const imageUrl = `url('/images/apt_up${level}.png')`;
             return (
@@ -402,7 +599,72 @@ export default function MapComponent() {
                   }}
                   textAlign={"center"}
                   color={"white"}
+                  onClick={(event) => onApartmentClick(item.id, event)}
                 >
+                  <HStack
+                    pos={"absolute"}
+                    top={"-54px"}
+                    left={"50%"}
+                    transform={"translateX(-50%)"}
+                    spacing={"4px"}
+                    bg={"#10a37f"}
+                    borderRadius={"8px"}
+                    px={"4px"}
+                    py={"4px"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                  >
+                    {level % 2 === 0 && (
+                      <>
+                        <PiOpenAiLogo color="#222222" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
+                          +2.5%
+                        </Box>
+                      </>
+                    )}
+                    {level % 2 === 1 && (
+                      <>
+                        <PiOpenAiLogo color="#222222" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
+                          -2.5%
+                        </Box>
+                      </>
+                    )}
+                  </HStack>
+
+                  <HStack
+                    pos={"absolute"}
+                    top={"-26px"}
+                    left={"50%"}
+                    transform={"translateX(-50%)"}
+                    spacing={"4px"}
+                    bg={"#f2f2f2"}
+                    borderRadius={"8px"}
+                    px={"4px"}
+                    py={"4px"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                  >
+                    {level % 2 === 0 && (
+                      <>
+                        <FaFire color="#FF4500" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"#FF4500"}>
+                          +2.5%
+                        </Box>
+                      </>
+                    )}
+                    {level % 2 === 1 && (
+                      <>
+                        <FaSnowflake color="#80D8FF" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"#339FFF"}>
+                          -2.5%
+                        </Box>
+                      </>
+                    )}
+                  </HStack>
+
                   <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
                     {item.minAmount
                       ? `${(item.minAmount / 10000).toFixed(item.minAmount >= 100000 ? 0 : 1)}억`
@@ -435,7 +697,8 @@ export default function MapComponent() {
               </CustomOverlayMap>
             );
           })}
-        {zoomLevel === 5 &&
+        {zoomLevel >= 4 &&
+          zoomLevel <= 5 &&
           data?.map(({ lat, lng, city, avg }: any) => (
             <CustomOverlayMap key={`dong-${city}`} position={{ lat, lng }}>
               <VStack
@@ -459,7 +722,7 @@ export default function MapComponent() {
               </VStack>
             </CustomOverlayMap>
           ))}
-
+        {zoomLevel >= 6 && zoomLevel <= 9 && mapInstance && renderPolygons(mapInstance)}
         {zoomLevel >= 6 &&
           zoomLevel <= 9 &&
           data?.map(({ lat, lng, city, avg }: any) => (
@@ -548,13 +811,14 @@ export default function MapComponent() {
         </Button>
       </Box>
 
+      {/* 검색 박스 */}
       <Box
         position={"absolute"}
         left={"10px"}
         top={"10px"}
         minW={"358px"}
         p={"10px"}
-        bg={"#FFFFFF"}
+        bg={backgroundColor}
         borderRadius={24}
         zIndex={1}
         boxShadow={"0px 2px 4px rgba(0,0,0,0.25)"}
