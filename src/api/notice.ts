@@ -70,7 +70,16 @@ export const getNotice = async (id: number): Promise<Notice & { tags: string[] }
 
 export const saveNotice = async (title: string, content: string): Promise<void> => {
   try {
-    await axiosInstance.post("notice", { title, content });
+    await axiosInstance.post(
+      "notice",
+      { title, content },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
   } catch (error: any) {
     console.error("Failed to save notice:", error.response?.data || error.message);
     throw new Error(error.response?.data || "Failed to save notice");
