@@ -48,11 +48,13 @@ export interface SidoAvgData {
 // API 요청 함수
 export const getApts = async (bounds: Bound): Promise<AptData[]> => {
   try {
-    const response = await axiosInstance.post<AptResponse>("/apt/bound", {
-      bottomLat: bounds.sw.lat,
-      leftLng: bounds.sw.lng,
-      topLat: bounds.ne.lat,
-      rightLng: bounds.ne.lng,
+    const response = await axiosInstance.get<AptResponse>("/apt/bound", {
+      params: {
+        bottomLat: bounds.sw.lat,
+        leftLng: bounds.sw.lng,
+        topLat: bounds.ne.lat,
+        rightLng: bounds.ne.lng,
+      },
     });
     return response.data.aptInfos;
   } catch (error: any) {
