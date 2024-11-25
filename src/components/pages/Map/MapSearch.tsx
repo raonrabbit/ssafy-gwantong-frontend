@@ -50,6 +50,7 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
       minH={"calc(100vh - 88px)"}
       bg={"gray.100"}
       zIndex={1}
+      overflowY={"auto"}
     >
       {/* 내부 Input */}
       <InputGroup p={"10px"}>
@@ -100,7 +101,14 @@ export default function MapSearch({ searchQuery, onSelectApartment }: MapSearchP
       </HStack>
 
       {/* 검색 결과 */}
-      <VStack py={5} align={"start"}>
+      <VStack
+        py={5}
+        align={"start"}
+        overflowY={"scroll"} // 스크롤 활성화
+        maxHeight={"calc(100vh - 140px)"} // 최대 높이 지정 (헤더/패딩 제외)
+        w={"100%"}
+        className="no-scrollbar"
+      >
         <Text fontSize={"14px"} color={"#F4945B"} px={5}>
           아파트
         </Text>

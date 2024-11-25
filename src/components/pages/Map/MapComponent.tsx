@@ -8,7 +8,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { Map, CustomOverlayMap, MapMarker } from "react-kakao-maps-sdk";
+import { Map, CustomOverlayMap, MapMarker, Polyline } from "react-kakao-maps-sdk";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getApts, geCityDongAvg } from "../../../api/apt";
@@ -62,6 +62,70 @@ export default function MapComponent() {
     retry: 1, // 요청 실패 시 한 번만 재시도
   });
 
+  // 거리 계산 관련 상태 추가
+  const [isdrawing, setIsdrawing] = useState(false); // 거리 측정 모드 여부
+  const [paths, setPaths] = useState<{ lat: number; lng: number }[]>([]); // 클릭된 지점 저장
+  const [distances, setDistances] = useState<number[]>([]); // 각 지점 간 거리 저장
+  const [mousePosition, setMousePosition] = useState({ lat: 0, lng: 0 }); // 현재 마우스 위치
+
+  // 거리 정보 표시 컴포넌트 추가
+  const DistanceInfo = ({ distance }: { distance: number }) => {
+    const roundDistance = distance.toFixed(1);
+    const walkTime = Math.floor(distance / 67); // 도보 시간 계산 (67m/분)
+    const bikeTime = Math.floor(distance / 227); // 자전거 시간 계산 (227m/분)
+
+    return (
+      <Box
+        bg="white"
+        border="1px solid #F37021"
+        borderRadius="8px"
+        p="4px"
+        fontSize="12px"
+        fontWeight="bold"
+        color="black"
+      >
+        총 거리: {roundDistance}m<br />
+        도보: {walkTime}분<br />
+        자전거: {bikeTime}분
+      </Box>
+    );
+  };
+
+  // 지도 클릭 시 경로에 지점 추가
+  const handleMapClick = (_map: kakao.maps.Map, mouseEvent: kakao.maps.event.MouseEvent) => {
+    const newPoint = {
+      lat: mouseEvent.latLng.getLat(),
+      lng: mouseEvent.latLng.getLng(),
+    };
+    setPaths((prev) => [...prev, newPoint]); // 새로운 지점 추가
+    setIsdrawing(true); // 거리 측정 모드 활성화
+  };
+
+  // 지도에서 마우스 이동 시 현재 위치 갱신
+  const handleMouseMove = (_map: kakao.maps.Map, mouseEvent: kakao.maps.event.MouseEvent) => {
+    setMousePosition({
+      lat: mouseEvent.latLng.getLat(),
+      lng: mouseEvent.latLng.getLng(),
+    });
+  };
+
+  // 지도 우클릭 시 거리 측정 종료
+  const handleRightClick = () => {
+    setIsdrawing(false);
+    setDistances([]); // 거리 초기화
+    setPaths([]); // 경로 초기화
+  };
+
+  // 거리 계산 로직
+  useEffect(() => {
+    if (paths.length > 1) {
+      const linePath = paths.map((point) => new kakao.maps.LatLng(point.lat, point.lng));
+      const polyline = new kakao.maps.Polyline({ path: linePath });
+      const totalDistance = polyline.getLength(); // 총 거리 계산
+      setDistances([totalDistance]);
+    }
+  }, [paths]);
+
   useEffect(() => {
     if (mapInstance) {
       const kakaoBounds = mapInstance.getBounds();
@@ -95,7 +159,6 @@ export default function MapComponent() {
       ne: { lat: ne.getLat(), lng: ne.getLng() },
     };
 
-    // console.log("New bounds:", newBounds);
     setBounds(newBounds); // refetch는 useEffect에서 처리
     setZoomLevel(map.getLevel());
   };
@@ -182,7 +245,6 @@ export default function MapComponent() {
 
   useEffect(() => {
     if (apartmentId) {
-      console.log("apartmentId:", apartmentId);
       setFocusedApartment({
         lat: 37.5273578454093,
         lng: 127.048456229401,
@@ -190,12 +252,16 @@ export default function MapComponent() {
         minAmount: 2000000,
         maxAmount: 3000000,
       });
-      if (mapInstance && focusedApartment) {
-        const newCenter = new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng);
-        mapInstance.setCenter(newCenter); // Update map center
-        const overlay = new kakao.maps.CustomOverlay({
-          position: new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng),
-          content: `
+    }
+  }, [apartmentId, mapInstance]); // apartmentId나 mapInstance가 변경될 때만 실행
+
+  useEffect(() => {
+    if (focusedApartment && mapInstance) {
+      const newCenter = new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng);
+      mapInstance.setCenter(newCenter); // Update map center
+      const overlay = new kakao.maps.CustomOverlay({
+        position: new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng),
+        content: `
             <div style="
               width: 56px;
               height: 70px;
@@ -224,17 +290,44 @@ export default function MapComponent() {
                 }
               </div>
             </div>`,
-          zIndex: 9999, // 포커싱된 마커의 zIndex 설정
-        });
+        zIndex: 9999,
+      });
 
-        overlay.setMap(mapInstance);
+      overlay.setMap(mapInstance);
 
-        return () => {
-          overlay.setMap(null); // Clean up the overlay when component unmounts or data changes
-        };
+      return () => {
+        overlay.setMap(null);
+      };
+    }
+  }, [focusedApartment]);
+
+  // 바운드 내에 이미지를 4단계로 나눔
+  const [minValue, setMinValue] = useState<number>(0);
+  const [maxValue, setMaxValue] = useState<number>(0);
+  const [range, setRange] = useState<number>(0);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const maxAmounts = data.map((item: any) => item.maxAmount).filter(Boolean);
+
+      if (maxAmounts.length > 0) {
+        const min = Math.min(...maxAmounts);
+        const max = Math.max(...maxAmounts);
+        const calculatedRange = (max - min) / 4;
+
+        setMinValue(min);
+        setMaxValue(max);
+        setRange(calculatedRange);
       }
     }
-  }, [apartmentId, mapInstance]);
+  }, [data]);
+
+  const getLevel = (value: number) => {
+    if (value <= minValue + range) return 1;
+    if (value <= minValue + range * 2) return 2;
+    if (value <= minValue + range * 3) return 3;
+    return 4;
+  };
 
   return (
     <div
@@ -246,19 +339,51 @@ export default function MapComponent() {
       }}
     >
       <Map
-        center={{ lat: 37.5236077, lng: 127.0572148 }}
+        center={{ lat: 37.5012748, lng: 127.039625 }}
         level={zoomLevel}
         style={{ width: "100%", height: "100%" }}
         onCreate={(map) => {
           setMapInstance(map);
           kakao.maps.event.addListener(map, "idle", () => onIdle(map));
         }}
+        onClick={handleMapClick} // 클릭 이벤트 핸들러 추가
+        onMouseMove={handleMouseMove} // 마우스 이동 이벤트 핸들러 추가
+        onRightClick={handleRightClick} // 우클릭 이벤트 핸들러 추가
       >
+        {/* Polyline 그리기 */}
+        <Polyline
+          path={paths}
+          strokeWeight={3}
+          strokeColor="#db4040"
+          strokeOpacity={1}
+          strokeStyle="solid"
+        />
+
+        {/* 현재 마우스 위치와 마지막 경로를 연결하는 임시 선 */}
+        {isdrawing && (
+          <Polyline
+            path={[...paths, mousePosition]}
+            strokeWeight={2}
+            strokeColor="#ff6b6b"
+            strokeOpacity={0.5}
+            strokeStyle="dashed"
+          />
+        )}
+
+        {/* 거리 정보 표시 */}
+        {distances.length > 0 && (
+          <CustomOverlayMap position={paths[paths.length - 1]} zIndex={2} yAnchor={1}>
+            <DistanceInfo distance={distances[distances.length - 1]} />
+          </CustomOverlayMap>
+        )}
+
         {zoomLevel <= 4 &&
           data?.map((item: any, index: number) => {
             if (!item.lat || !item.lng) return null; // 유효하지 않은 좌표는 무시
             if (item.lat === focusedApartment?.lat && item.lng === focusedApartment?.lng)
               return null;
+            const level = getLevel(item.maxAmount);
+            const imageUrl = `url('/images/apt_up${level}.png')`;
             return (
               <CustomOverlayMap
                 key={item.id || index}
@@ -271,7 +396,7 @@ export default function MapComponent() {
                   w={"56px"}
                   h={"70px"}
                   style={{
-                    backgroundImage: "url('/images/apt_up1.png')",
+                    backgroundImage: imageUrl,
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                   }}
@@ -396,61 +521,6 @@ export default function MapComponent() {
             }}
           ></MapMarker>
         )}
-
-        {/* 포커싱된 마커 */}
-        {/* {focusedApartment && (
-          <CustomOverlayMap
-            position={{
-              lat: focusedApartment.lat,
-              lng: focusedApartment.lng,
-            }}
-          >
-            <Box
-              w={"56px"}
-              h={"70px"}
-              textAlign={"center"}
-              color={"#F37021"}
-              style={{
-                backgroundImage: "url('/images/apt_clicked.png')",
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-              }}
-            >
-              <Box lineHeight={1.1} pt={"9px"} fontSize={"12px"} fontWeight={"bold"}>
-                {focusedApartment.minAmount
-                  ? `${(focusedApartment.minAmount / 10000).toFixed(
-                      focusedApartment.minAmount >= 100000 ? 0 : 1
-                    )}억`
-                  : "N/A"}
-              </Box>
-              <Box lineHeight={1.1} fontSize={"10px"}>
-                ~
-                {focusedApartment.maxAmount
-                  ? `${(focusedApartment.maxAmount / 10000).toFixed(
-                      focusedApartment.maxAmount >= 100000 ? 0 : 1
-                    )}억`
-                  : "N/A"}
-              </Box>
-              <Box
-                position="absolute"
-                bottom="-16px"
-                transform="translateX(-50%)"
-                left="50%"
-                fontSize="10px"
-                lineHeight="1.4"
-                color="white"
-                pb="1px"
-                px="3px"
-                opacity="0.8"
-                bg="rgb(96, 96, 96)"
-                overflow="hidden"
-                textOverflow="ellipsis"
-              >
-                {focusedApartment.name ?? "Unknown"}
-              </Box>
-            </Box>
-          </CustomOverlayMap>
-        )} */}
       </Map>
 
       {/* 줌 컨트롤 버튼 */}
@@ -487,6 +557,7 @@ export default function MapComponent() {
         bg={"#FFFFFF"}
         borderRadius={24}
         zIndex={1}
+        boxShadow={"0px 2px 4px rgba(0,0,0,0.25)"}
       >
         <InputGroup>
           <Input
