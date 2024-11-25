@@ -92,10 +92,9 @@ export default function Login() {
         boxShadow="lg"
         bg={loginBoxColor}
       >
-        <Text fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
+        {/* <Text fontSize="2xl" fontWeight="bold" mb={4} textAlign="center">
           로그인
         </Text>
-        {/* Form 시작 */}
         <Box as="form" onSubmit={handleSubmit}>
           <VStack spacing={4}>
             <InputGroup>
@@ -142,7 +141,13 @@ export default function Login() {
               로그인
             </Button>
           </VStack>
-        </Box>
+        </Box> */}
+        <VStack mb={6}>
+          <Text fontSize={24}>간편하게 로그인하고</Text>
+          <Text fontSize={24} fontWeight={"bold"}>
+            편리한 기능을 사용해보세요.
+          </Text>
+        </VStack>
         {/* 소셜 로그인 */}
         <SocialLogin />
       </Box>

@@ -5,18 +5,18 @@ import { SiNaver } from "react-icons/si";
 
 export default function SocialLogin() {
   return (
-    <Box marginBottom={4}>
-      <HStack marginY={8}>
+    <Box>
+      {/* <HStack marginY={8}>
         <Divider />
         <Text textTransform={"uppercase"} color={"gray.500"} fontSize={"xs"} as={"b"}>
           or
         </Text>
         <Divider />
-      </HStack>
+      </HStack> */}
       <VStack>
-        <Button as={"a"} href="#" width={"100%"} leftIcon={<FcGoogle />}>
+        {/* <Button as={"a"} href="#" width={"100%"} leftIcon={<FcGoogle />}>
           Google로 로그인
-        </Button>
+        </Button> */}
         <Button
           as={"a"}
           href={`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=606efaf9e836014c26d1900463f90444&redirect_uri=http://localhost:3000/auth/redirect`}
@@ -26,9 +26,9 @@ export default function SocialLogin() {
         >
           Kakao로 로그인
         </Button>
-        <Button as={"a"} href={`#`} width={"100%"} leftIcon={<SiNaver />} colorScheme={"green"}>
+        {/* <Button as={"a"} href={`#`} width={"100%"} leftIcon={<SiNaver />} colorScheme={"green"}>
           Naver로 로그인
-        </Button>
+        </Button> */}
       </VStack>
     </Box>
   );
