@@ -39,6 +39,8 @@ interface AptData {
   name: string;
   minAmount: number;
   maxAmount: number;
+  aiPriceChangePercent: number;
+  monthComparisonPercent: number;
 }
 
 export default function MapComponent() {
@@ -297,7 +299,6 @@ export default function MapComponent() {
       const overlay = new kakao.maps.CustomOverlay({
         position: new kakao.maps.LatLng(focusedApartment.lat, focusedApartment.lng),
         content: `
-        
             <div style="
               width: 56px;
               height: 70px;
@@ -344,10 +345,18 @@ export default function MapComponent() {
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
                 width: 68px;
               ">
-                <img src="/images/FaFire.svg" alt="Fire Icon" style="width: 16px; height: 16px;" />
+              ${
+                focusedApartment.monthComparisonPercent >= 0
+                  ? `<img src="/images/FaFire.svg" alt="Fire Icon" style="width: 16px; height: 16px;" />
                 <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
-                  +2.5%
-                </span>
+                  +${focusedApartment.monthComparisonPercent.toFixed(1)}%
+                </span>`
+                  : `<img src="/images/FaSnowflake.svg" alt="Snow Icon" style="width: 16px; height: 16px;" />
+                <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
+                  ${focusedApartment.monthComparisonPercent.toFixed(1)}%
+                </span>`
+              }
+
               </div>
 
               <div style="line-height: 1.1; padding-top: 9px; font-size: 12px; font-weight: bold;">
@@ -615,19 +624,19 @@ export default function MapComponent() {
                     justifyContent={"center"}
                     boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
                   >
-                    {level % 2 === 0 && (
+                    {item.aiPriceChangePercent > 0 && (
                       <>
                         <PiOpenAiLogo color="#222222" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
-                          +2.5%
+                          +{item.aiPriceChangePercent.toFixed(1)}%
                         </Box>
                       </>
                     )}
-                    {level % 2 === 1 && (
+                    {item.aiPriceChangePercent < 0 && (
                       <>
                         <PiOpenAiLogo color="#222222" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
-                          -2.5%
+                          {item.aiPriceChangePercent.toFixed(1)}%
                         </Box>
                       </>
                     )}
@@ -647,19 +656,19 @@ export default function MapComponent() {
                     justifyContent={"center"}
                     boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
                   >
-                    {level % 2 === 0 && (
+                    {item.monthComparisonPercent >= 0 && (
                       <>
                         <FaFire color="#FF4500" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"#FF4500"}>
-                          +2.5%
+                          +{item.monthComparisonPercent.toFixed(1)}%
                         </Box>
                       </>
                     )}
-                    {level % 2 === 1 && (
+                    {item.monthComparisonPercent < 0 && (
                       <>
                         <FaSnowflake color="#80D8FF" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"#339FFF"}>
-                          -2.5%
+                          {item.monthComparisonPercent.toFixed(1)}%
                         </Box>
                       </>
                     )}

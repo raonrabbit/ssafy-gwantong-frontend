@@ -14,6 +14,8 @@ export interface AptData {
   name: string;
   minAmount: number;
   maxAmount: number;
+  aiPriceChangePercent: number;
+  monthComparisonPercent: number;
 }
 
 interface AptsResponse {
