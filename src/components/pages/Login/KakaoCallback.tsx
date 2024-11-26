@@ -47,7 +47,7 @@ export default function KakaoCallback() {
 
         // 2. 토큰으로 사용자 정보 요청
         const userResponse: any = await axios.get(
-          `${process.env.REACT_APP_ORIGIN_URI}/api/v1/user/profile`,
+          `${process.env.REACT_APP_API_URI}/api/v1/user/profile`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
