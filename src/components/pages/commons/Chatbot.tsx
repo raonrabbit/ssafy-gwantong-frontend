@@ -82,8 +82,10 @@ const ChatbotButton: React.FC = () => {
         </Tooltip>
       ) : (
         <Box
-          w="500px"
-          h="800px"
+          // w="500px"
+          // h="800px"
+          w="400px"
+          h="600px"
           bg={chatBg}
           boxShadow="md"
           borderRadius="24px"
