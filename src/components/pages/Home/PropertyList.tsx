@@ -11,83 +11,39 @@ import {
 } from "@chakra-ui/react";
 import PropertyCard from "./PropertyCard";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getHotApts } from "../../../api/apt";
 
-type PropertyCardProps = {
-  imageUrl: string;
-  title: string;
-  price: string;
-  details: string;
-  location: string;
-};
+interface HotAptData {
+  aptId: string;
+  aptName: string;
+  buildYear: number;
+  recentMonth: string;
+  recentPrice: number;
+  previousMonth: string;
+  previousPrice: number;
+  jibun: string;
+  roadName: string;
+  sidoName: string;
+  gugunName: string;
+  dongName: string;
+}
 
 export default function PropertyList() {
   const buttonColor = useColorModeValue("blackAlpha.900", "gray.600");
   const hoverColor = useColorModeValue("blackAlpha.700", "gray.400");
   const navigate = useNavigate();
-  const properties: PropertyCardProps[] = [
-    {
-      imageUrl: "/images/property1.png",
-      title: "청담 자이",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property2.png",
-      title: "타워팰리스",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property1.png",
-      title: "청담 자이",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property2.png",
-      title: "타워팰리스",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property1.png",
-      title: "청담 자이",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property2.png",
-      title: "타워팰리스",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property1.png",
-      title: "청담 자이",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-    {
-      imageUrl: "/images/property2.png",
-      title: "타워팰리스",
-      price: "평균 21억 7,600",
-      details: "2014년 준공",
-      location: "# 서울 # 강남구 # 아파트",
-    },
-  ];
+
+  const { data } = useQuery<HotAptData[]>({
+    queryKey: ["hotApts"],
+    queryFn: getHotApts,
+  });
 
   return (
     <VStack spacing={8} align="stretch" maxW={"1712px"} marginX={"auto"} marginTop={48}>
       <VStack align="flex-start" spacing={2}>
         <HStack gap={0}>
-          <Image src={"images/Fire.webp"} h={"78px"}></Image>
+          <Image src={"images/Fire.webp"} h={"78px"} animation={"bounce 4s infinite"}></Image>
           <Heading as="h1" size="xl" fontWeight="bold">
             핫한 매물
           </Heading>
@@ -105,15 +61,13 @@ export default function PropertyList() {
         }}
         gap={4}
       >
-        {properties.map((property, index) => (
-          <Link key={index} to={`/map/apt/${index}`}>
+        {data?.slice(0, 8).map((hotApt: any) => (
+          <Link key={hotApt.aptId} to={`/map/apt/${hotApt.aptId}`}>
             <PropertyCard
-              key={index}
-              imageUrl={property.imageUrl}
-              title={property.title}
-              price={property.price}
-              details={property.details}
-              location={property.location}
+              {...hotApt}
+              percentChange={
+                ((hotApt.recentPrice - hotApt.previousPrice) / hotApt.previousPrice) * 100
+              }
             />
           </Link>
         ))}

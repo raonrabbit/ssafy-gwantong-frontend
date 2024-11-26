@@ -51,6 +51,21 @@ export interface SidoAvgData {
   avgPrice: number;
 }
 
+interface HotAptData {
+  aptId: string;
+  aptName: string;
+  buildYear: number;
+  recentMonth: string;
+  recentPrice: number;
+  previousMonth: string;
+  previousPrice: number;
+  jibun: string;
+  roadName: string;
+  sidoName: string;
+  gugunName: string;
+  dongName: string;
+}
+
 // 단일 거래 정보 인터페이스
 interface TradeDetail {
   date: string; // 거래 날짜
@@ -159,5 +174,15 @@ export const getAptDetailById = async (aptId: string) => {
   } catch (error: any) {
     console.error("Failed to fetch focused apartment:", error.response?.data || error.message);
     throw new Error(error.response?.data || "Failed to fetch focused apartment");
+  }
+};
+
+export const getHotApts = async (): Promise<HotAptData[]> => {
+  try {
+    const response = await axiosInstance.get<HotAptData[]>("/apt/hot-apts");
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to fetch hot apts:", error.response?.data || error.message);
+    throw new Error(error.response?.data || "Failed to fetch hot apts");
   }
 };
