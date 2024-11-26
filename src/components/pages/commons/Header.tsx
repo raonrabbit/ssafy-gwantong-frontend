@@ -66,10 +66,7 @@ export default function Header() {
         maxW={maxWidth}
         marginX={"auto"}
         alignItems={"center"}
-        direction={{
-          sm: "column",
-          md: "row",
-        }}
+        direction={"row"}
         spacing={{
           sm: 4,
           md: 0,

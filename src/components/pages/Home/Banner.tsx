@@ -27,7 +27,6 @@ export default function Banner() {
       maxW={"1712px"}
       marginX={"auto"}
       pt={6}
-      mt={{ sm: "40px", md: "0px" }}
       alignItems={{ sm: "center" }}
       justifyContent={"space-between"}
     >
