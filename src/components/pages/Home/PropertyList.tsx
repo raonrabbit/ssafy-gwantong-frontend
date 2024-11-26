@@ -10,6 +10,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import PropertyCard from "./PropertyCard";
+import { Link, useNavigate } from "react-router-dom";
 
 type PropertyCardProps = {
   imageUrl: string;
@@ -22,6 +23,7 @@ type PropertyCardProps = {
 export default function PropertyList() {
   const buttonColor = useColorModeValue("blackAlpha.900", "gray.600");
   const hoverColor = useColorModeValue("blackAlpha.700", "gray.400");
+  const navigate = useNavigate();
   const properties: PropertyCardProps[] = [
     {
       imageUrl: "/images/property1.png",
@@ -104,14 +106,16 @@ export default function PropertyList() {
         gap={4}
       >
         {properties.map((property, index) => (
-          <PropertyCard
-            key={index}
-            imageUrl={property.imageUrl}
-            title={property.title}
-            price={property.price}
-            details={property.details}
-            location={property.location}
-          />
+          <Link key={index} to={`/map/apt/${index}`}>
+            <PropertyCard
+              key={index}
+              imageUrl={property.imageUrl}
+              title={property.title}
+              price={property.price}
+              details={property.details}
+              location={property.location}
+            />
+          </Link>
         ))}
       </Grid>
 
@@ -125,6 +129,7 @@ export default function PropertyList() {
         _hover={{
           backgroundColor: hoverColor,
         }}
+        onClick={() => navigate("/map")}
       >
         더보기
       </Button>

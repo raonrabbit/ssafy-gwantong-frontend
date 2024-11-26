@@ -16,10 +16,12 @@ export default function HomeNoticeCard({ title, date, content }: NoticeCardProps
       borderWidth="1px"
       borderRadius="16px"
       bg={cardBox}
-      boxShadow="md"
+      boxShadow="lg"
       p={10}
       maxW="848px"
       w="full"
+      _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+      transition="all 0.3s ease"
     >
       <Stack spacing={3}>
         <HStack spacing={2}>

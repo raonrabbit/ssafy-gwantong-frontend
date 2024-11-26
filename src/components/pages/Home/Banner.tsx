@@ -23,7 +23,7 @@ export default function Banner() {
 
   return (
     <Stack
-      direction={{ md: "row", sm: "column" }}
+      direction={{ md: "row", sm: "column", base: "column" }}
       maxW={"1712px"}
       marginX={"auto"}
       pt={6}
@@ -70,7 +70,7 @@ export default function Banner() {
       </Box>
 
       <Stack
-        direction={{ sm: "row", md: "column" }}
+        direction={{ sm: "row", md: "column", base: "column" }}
         w={{ sm: "600px", md: "272px" }}
         h={{ sm: "200px", md: "808px" }}
         justifyContent={"space-between"}
@@ -128,7 +128,7 @@ export default function Banner() {
             <Box
               px={4}
               bg={subCardBox}
-              w={"100%"}
+              w={{ sm: "100%" }}
               textAlign={"center"}
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}
@@ -140,7 +140,7 @@ export default function Banner() {
             <Box
               px={4}
               bg={subCardBox}
-              w={"100%"}
+              w={{ sm: "100%" }}
               textAlign={"center"}
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}
@@ -152,7 +152,7 @@ export default function Banner() {
             <Box
               px={4}
               bg={subCardBox}
-              w={"100%"}
+              w={{ sm: "100%" }}
               textAlign={"center"}
               borderRadius={12}
               boxShadow={"inset 0px 1px 4px rgba(0, 0, 0, 0.25)"}

@@ -804,7 +804,7 @@ export default function MapComponent() {
                   <Box fontSize={"11px"}>{city}</Box>
                   <Box fontSize={"12px"} fontWeight={"bold"}>
                     {latestAvg
-                      ? `${((latestAvg * 25) / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
+                      ? `${(latestAvg / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
                       : "정보없음"}
                   </Box>
                 </VStack>
@@ -874,7 +874,7 @@ export default function MapComponent() {
                   <Box fontSize={"11px"}>{city}</Box>
                   <Box fontSize={"12px"} fontWeight={"bold"}>
                     {latestAvg
-                      ? `${((latestAvg * 25) / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
+                      ? `${(latestAvg / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
                       : "N/A"}
                   </Box>
                 </VStack>

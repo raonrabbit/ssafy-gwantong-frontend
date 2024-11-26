@@ -47,13 +47,15 @@ export default function HomeNoticeList() {
         w="full"
         mx="auto"
       >
-        {notices?.map((notice, index) => (
-          <NoticeCard
-            key={index}
-            title={notice.title}
-            date={notice.createdAt}
-            content={notice.content}
-          />
+        {notices?.map((notice) => (
+          <Link to={`/notices/${notice.id}`} key={notice.id}>
+            <NoticeCard
+              key={notice.id}
+              title={notice.title}
+              date={notice.createdAt}
+              content={notice.content}
+            />
+          </Link>
         ))}
       </Grid>
     </VStack>

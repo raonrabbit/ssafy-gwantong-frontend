@@ -7,9 +7,12 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import { MdOutlineApartment } from "react-icons/md";
 import { FiBookmark } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 type PropertyCardProps = {
   imageUrl: string;
@@ -28,6 +31,27 @@ export default function PropertyCard({
 }: PropertyCardProps) {
   const cardBox = useColorModeValue("white", "gray.700");
   const cardTagContent = useColorModeValue("#F7FAFC", "gray.500");
+
+  const toast = useToast();
+  const navigate = useNavigate();
+  const user = useSelector((state: any) => state.auth.user);
+  const token = useSelector((state: any) => state.auth.token);
+
+  const handleBookmarkClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    if (!user || !token) {
+      toast({
+        title: "로그인이 필요합니다.",
+        description: "즐겨찾기를 추가하려면 로그인해주세요.",
+        status: "warning",
+        duration: 3000, // 3초 동안 표시
+        isClosable: true,
+        position: "top",
+      });
+      navigate("/login");
+    }
+  };
+
   return (
     <Box borderRadius="24px" bg={cardBox} boxShadow="md" maxWidth={"416"}>
       <Box
@@ -59,7 +83,7 @@ export default function PropertyCard({
               </Text>
             </Box>
           </HStack>
-          <FiBookmark size={24} cursor={"pointer"} />
+          <FiBookmark size={24} cursor={"pointer"} onClick={handleBookmarkClick} />
         </HStack>
         <VStack justifyContent={"space-between"} align={"start"} h={"100%"}>
           <VStack align={"start"} mt={3}>
