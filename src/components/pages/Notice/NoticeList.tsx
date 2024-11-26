@@ -96,13 +96,6 @@ const NoticeList = () => {
                 bgColor: bgColor,
               }}
             >
-              <Image
-                src={`https://via.placeholder.com/150?text=${notice.title}`} // Placeholder 이미지
-                alt={notice.title}
-                boxSize="100px"
-                objectFit="cover"
-                borderRadius="md"
-              />
               <Box>
                 <Text fontSize="sm" color="gray.500" mb={1}>
                   {new Date(notice.createdAt).toLocaleDateString()}
