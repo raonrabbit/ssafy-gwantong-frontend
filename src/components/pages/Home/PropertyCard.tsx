@@ -53,7 +53,14 @@ export default function PropertyCard({
   };
 
   return (
-    <Box borderRadius="24px" bg={cardBox} boxShadow="md" maxWidth={"416"}>
+    <Box
+      borderRadius="24px"
+      bg={cardBox}
+      boxShadow="md"
+      maxWidth={"416"}
+      _hover={{ transform: "scale(1.05)", boxShadow: "lg" }}
+      transition="all 0.3s ease"
+    >
       <Box
         position={"relative"}
         overflow={"hidden"}
