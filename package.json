@@ -57,5 +57,6 @@
   },
   "devDependencies": {
     "@types/axios": "^0.9.36"
-  }
+  },
+  "proxy": "https://ezip-lb-673574854.ap-northeast-2.elb.amazonaws.com"
 }
