@@ -6,7 +6,7 @@ const localAxios = () => {
     withCredentials: true,
     headers: {
       "Content-Type": "application/json;charset=utf-8",
-      "Access-Control-Allow-Origin": "https://ezip-lb-673574854.ap-northeast-2.elb.amazonaws.com/",
+      "Access-Control-Allow-Origin": "*",
       crossDomain: true,
     },
   });
