@@ -26,7 +26,8 @@ export default function Header() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation(); // 현재 경로 가져오기
-  const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
+  // const logoSrc = useColorModeValue("/images/logo-light.svg", "/images/logo-dark.svg");
+  const logoSrc = useColorModeValue("/images/logo-light.png", "/images/logo-dark.png");
   const logoSymbolSrc = "/images/symbol.svg";
   const responsiveLogoSrc = useBreakpointValue({
     base: logoSymbolSrc,
