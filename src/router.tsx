@@ -3,7 +3,6 @@ import Root from "./components/Root";
 import Home from "./routes/Home";
 import NotFound from "./routes/NotFound";
 import Login from "./routes/Login";
-import Join from "./routes/Join";
 import MapPage from "./routes/MapPage";
 import MyPage from "./routes/MyPage";
 import MapSearchPage from "./routes/MapSearchPage";
@@ -29,11 +28,19 @@ const router = createBrowserRouter([
       },
       {
         path: "mypage",
-        element: <MyPage />,
+        element: (
+          <ProtectedRoute>
+            <MyPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "bookmark",
-        element: <BookmarkPage />,
+        element: (
+          <ProtectedRoute>
+            <BookmarkPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "login",
@@ -42,10 +49,6 @@ const router = createBrowserRouter([
       {
         path: "/auth/redirect",
         element: <KakaoCallback />,
-      },
-      {
-        path: "join",
-        element: <Join />,
       },
       {
         path: "map",

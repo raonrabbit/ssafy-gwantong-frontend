@@ -16,11 +16,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getApts, geCityDongAvg, getAptFocusById } from "../../../api/apt";
 import { MdMyLocation } from "react-icons/md";
 import { FaSearch, FaSnowflake } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { PiOpenAiLogo } from "react-icons/pi";
 import { FaFire } from "react-icons/fa";
 import polygonData from "./TL_SCCO_SIG.json";
 import { MdClose } from "react-icons/md";
+import { GoDash } from "react-icons/go";
 
 interface BoundPosition {
   lat: number;
@@ -52,6 +53,11 @@ export default function MapComponent() {
   const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null); // 현재 위치 저장
   const [focusedApartment, setFocusedApartment] = useState<AptData | null>(null); // Store the focused apartment details
   const toast = useToast();
+
+  const location = useLocation();
+
+  // 특정 경로에서 SearchBox 숨기기
+  const hideSearchBox = location.pathname === "/map";
 
   // 다크모드 적용
   const backgroundColor = useColorModeValue("#FFFFFF", "gray.600");
@@ -309,26 +315,35 @@ export default function MapComponent() {
               color: #F37021;
               z-index: 9999;
               animation: bounce 2s infinite;">
-            <!-- HStack 1 -->
-              <div style="
-                position: absolute;
-                top: -54px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: #10a37f;
-                border-radius: 8px;
-                padding: 4px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                width: 68px;
-              ">
-                <img src="/images/SiOpenai.svg" alt="OpenAI Logo" style="width: 16px; height: 16px;" />
-                <span style="font-size: 12px; font-weight: bold; color: white; margin-left: 4px;">
-                  +2.5%
-                </span>
-              </div>
+              ${
+                focusedApartment.aiPriceChangePercent !== 0
+                  ? `
+                  <!-- HStack 1 -->
+                  <div style="
+                    position: absolute;
+                    top: -54px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #1F1F1F;
+                    border-radius: 8px;
+                    padding: 4px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    width: 78px;
+                  ">
+                    <img src="/images/SiOpenai.svg" alt="OpenAI Logo" style="width: 16px; height: 16px;" />
+                    <span style="font-size: 12px; font-weight: bold; color: #FFFFFF; margin-left: 4px;">
+                    ${
+                      focusedApartment.aiPriceChangePercent > 0
+                        ? `+${focusedApartment.aiPriceChangePercent.toFixed(1)}%`
+                        : `${focusedApartment.aiPriceChangePercent.toFixed(1)}%`
+                    }
+                    </span>
+                  </div>`
+                  : ""
+              }
               
               <!-- HStack 2 -->
               <div style="
@@ -343,19 +358,32 @@ export default function MapComponent() {
                 border-radius: 8px;
                 padding: 4px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                width: 68px;
+                width: 74px;
               ">
               ${
-                focusedApartment.monthComparisonPercent >= 0
+                focusedApartment.monthComparisonPercent > 0 &&
+                focusedApartment.monthComparisonPercent !== 100
                   ? `<img src="/images/FaFire.svg" alt="Fire Icon" style="width: 16px; height: 16px;" />
-                <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
-                  +${focusedApartment.monthComparisonPercent.toFixed(1)}%
-                </span>`
-                  : `<img src="/images/FaSnowflake.svg" alt="Snow Icon" style="width: 16px; height: 16px;" />
-                <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
-                  ${focusedApartment.monthComparisonPercent.toFixed(1)}%
-                </span>`
+                     <span style="font-size: 12px; font-weight: bold; color: #FF4500; margin-left: 4px;">
+                       +${focusedApartment.monthComparisonPercent.toFixed(1)}%
+                     </span>`
+                  : focusedApartment.monthComparisonPercent < 0
+                  ? `<img src="/images/FaSnowflake.svg" alt="Snow Icon" style="width: 16px; height: 16px;" />
+                     <span style="font-size: 12px; font-weight: bold; color: #339FFF; margin-left: 4px;">
+                       ${focusedApartment.monthComparisonPercent.toFixed(1)}%
+                     </span>`
+                  : focusedApartment.monthComparisonPercent === 100
+                  ? `<img src="/images/GoDash.svg" alt="Neutral Icon" style="width: 16px; height: 16px;" />
+                     <span style="font-size: 12px; font-weight: bold; color: #808080; margin-left: 4px;">
+                       0.0%
+                     </span>`
+                  : `<img src="/images/GoDash.svg" alt="Neutral Icon" style="width: 16px; height: 16px;" />
+                     <span style="font-size: 12px; font-weight: bold; color: #808080; margin-left: 4px;">
+                       0.0%
+                     </span>`
               }
+              
+              
 
               </div>
 
@@ -412,9 +440,13 @@ export default function MapComponent() {
   const [minValue, setMinValue] = useState<number>(0);
   const [maxValue, setMaxValue] = useState<number>(0);
   const [range, setRange] = useState<number>(0);
+  const [dongGuMinValue, setDongGuMinValue] = useState<number>(0);
+  const [dongGuMaxValue, setDongGuMaxValue] = useState<number>(0);
+  const [dongGuRange, setDongGuRange] = useState<number>(0);
 
   useEffect(() => {
     if (data && data.length > 0) {
+      // 바운드 4단계
       const maxAmounts = data.map((item: any) => item.maxAmount).filter(Boolean);
 
       if (maxAmounts.length > 0) {
@@ -426,13 +458,45 @@ export default function MapComponent() {
         setMaxValue(max);
         setRange(calculatedRange);
       }
+      // 구 동 별 바운드 4단계
+      const maxDongGuAvg = data.map((item: any) => item.avg).filter(Boolean);
+      if (maxDongGuAvg.length > 0) {
+        const min = Math.min(...maxDongGuAvg);
+        const max = Math.max(...maxDongGuAvg);
+        const calculatedRange = (max - min) / 4;
+
+        setDongGuMinValue(min);
+        setDongGuMaxValue(max);
+        setDongGuRange(calculatedRange);
+      }
     }
   }, [data]);
+
+  // 단계에 따른 색상 설정
+  const getDongGuBackgroundColor = (level: number): string => {
+    switch (level) {
+      case 1:
+        return "#FAC19E";
+      case 2:
+        return "#FFAA77";
+      case 3:
+        return "#FF9C60";
+      default:
+        return "#F37021";
+    }
+  };
 
   const getLevel = (value: number) => {
     if (value <= minValue + range) return 1;
     if (value <= minValue + range * 2) return 2;
     if (value <= minValue + range * 3) return 3;
+    return 4;
+  };
+
+  const getDongGuLevel = (value: number) => {
+    if (value <= dongGuMinValue + dongGuRange) return 1;
+    if (value <= dongGuMinValue + dongGuRange * 2) return 2;
+    if (value <= minValue + dongGuRange * 3) return 3;
     return 4;
   };
 
@@ -465,25 +529,11 @@ export default function MapComponent() {
           <Polygon
             path={path}
             strokeWeight={2}
-            strokeColor="#004c80"
-            strokeOpacity={0.8}
-            fillColor="#aadaff"
-            fillOpacity={0.7}
+            strokeColor="#F37021"
+            strokeOpacity={1}
+            fillColor="#FF6000"
+            fillOpacity={0.1}
           />
-          {/* 지역 이름 표시 */}
-          <CustomOverlayMap position={center}>
-            <Box
-              bg="white"
-              borderRadius="8px"
-              p="4px"
-              fontSize="12px"
-              fontWeight="bold"
-              textAlign="center"
-              boxShadow="0px 2px 4px rgba(0,0,0,0.25)"
-            >
-              {SIG_KOR_NM}
-            </Box>
-          </CustomOverlayMap>
         </React.Fragment>
       );
     });
@@ -587,7 +637,6 @@ export default function MapComponent() {
                 </CustomOverlayMap>
               );
             }
-
             const level = getLevel(item.maxAmount);
             const imageUrl = `url('/images/apt_up${level}.png')`;
             return (
@@ -610,37 +659,48 @@ export default function MapComponent() {
                   color={"white"}
                   onClick={(event) => onApartmentClick(item.id, event)}
                 >
-                  <HStack
-                    pos={"absolute"}
-                    top={"-54px"}
-                    left={"50%"}
-                    transform={"translateX(-50%)"}
-                    spacing={"4px"}
-                    bg={"#10a37f"}
-                    borderRadius={"8px"}
-                    px={"4px"}
-                    py={"4px"}
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                    boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
-                  >
-                    {item.aiPriceChangePercent > 0 && (
-                      <>
-                        <PiOpenAiLogo color="#222222" />
-                        <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
-                          +{item.aiPriceChangePercent.toFixed(1)}%
-                        </Box>
-                      </>
-                    )}
-                    {item.aiPriceChangePercent < 0 && (
-                      <>
-                        <PiOpenAiLogo color="#222222" />
-                        <Box fontSize={"12px"} fontWeight={"bold"} color={"white"}>
-                          {item.aiPriceChangePercent.toFixed(1)}%
-                        </Box>
-                      </>
-                    )}
-                  </HStack>
+                  {item.aiPriceChangePercent > 0 && (
+                    <HStack
+                      pos={"absolute"}
+                      top={"-54px"}
+                      left={"50%"}
+                      transform={"translateX(-50%)"}
+                      spacing={"4px"}
+                      bg={"#1F1F1F"}
+                      borderRadius={"8px"}
+                      px={"4px"}
+                      py={"4px"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                    >
+                      <PiOpenAiLogo color="#FFFFFF" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#FFFFFF"}>
+                        +{item.aiPriceChangePercent.toFixed(1)}%
+                      </Box>
+                    </HStack>
+                  )}
+                  {item.aiPriceChangePercent < 0 && (
+                    <HStack
+                      pos={"absolute"}
+                      top={"-54px"}
+                      left={"50%"}
+                      transform={"translateX(-50%)"}
+                      spacing={"4px"}
+                      bg={"#1F1F1F"}
+                      borderRadius={"8px"}
+                      px={"4px"}
+                      py={"4px"}
+                      alignItems={"center"}
+                      justifyContent={"center"}
+                      boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                    >
+                      <PiOpenAiLogo color="#FFFFFF" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#FFFFFF"}>
+                        {item.aiPriceChangePercent.toFixed(1)}%
+                      </Box>
+                    </HStack>
+                  )}
 
                   <HStack
                     pos={"absolute"}
@@ -656,7 +716,7 @@ export default function MapComponent() {
                     justifyContent={"center"}
                     boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
                   >
-                    {item.monthComparisonPercent >= 0 && (
+                    {item.monthComparisonPercent > 0 && item.monthComparisonPercent != 100 && (
                       <>
                         <FaFire color="#FF4500" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"#FF4500"}>
@@ -666,9 +726,25 @@ export default function MapComponent() {
                     )}
                     {item.monthComparisonPercent < 0 && (
                       <>
-                        <FaSnowflake color="#80D8FF" />
+                        <FaSnowflake color="#339FFF" />
                         <Box fontSize={"12px"} fontWeight={"bold"} color={"#339FFF"}>
                           {item.monthComparisonPercent.toFixed(1)}%
+                        </Box>
+                      </>
+                    )}
+                    {item.monthComparisonPercent === 100 && (
+                      <>
+                        <GoDash color="#808080" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"#808080"}>
+                          0.0%
+                        </Box>
+                      </>
+                    )}
+                    {item.monthComparisonPercent === 0 && (
+                      <>
+                        <GoDash color="#808080" />
+                        <Box fontSize={"12px"} fontWeight={"bold"} color={"#808080"}>
+                          0.0%
                         </Box>
                       </>
                     )}
@@ -708,55 +784,59 @@ export default function MapComponent() {
           })}
         {zoomLevel >= 4 &&
           zoomLevel <= 5 &&
-          data?.map(({ lat, lng, city, avg }: any) => (
-            <CustomOverlayMap key={`dong-${city}`} position={{ lat, lng }}>
-              <VStack
-                w={"85px"}
-                h={"53px"}
-                style={{
-                  backgroundImage: "url('/images/local_up2.png')",
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                }}
-                textAlign={"center"}
-                color={"white"}
-                lineHeight={1.2}
-                justifyContent={"center"}
-                spacing={0}
-              >
-                <Box fontSize={"11px"}>{city}</Box>
-                <Box fontSize={"12px"} fontWeight={"bold"}>
-                  {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
-                </Box>
-              </VStack>
-            </CustomOverlayMap>
-          ))}
+          data?.map(({ lat, lng, city, avg }: any) => {
+            const level = getDongGuLevel(avg); // avg 기준 단계 계산
+            const backgroundColor = getDongGuBackgroundColor(level); // 단계별 배경색 결정
+            return (
+              <CustomOverlayMap key={`dong-${city}`} position={{ lat, lng }}>
+                <VStack
+                  w={"85px"}
+                  h={"53px"}
+                  backgroundColor={backgroundColor} // 단계별 배경색 적용
+                  borderRadius={"24px"}
+                  boxShadow={"0 2px 4px rgba(0, 0, 0, 0.25)"}
+                  textAlign={"center"}
+                  color={"white"}
+                  lineHeight={1.2}
+                  justifyContent={"center"}
+                  spacing={0}
+                >
+                  <Box fontSize={"11px"}>{city}</Box>
+                  <Box fontSize={"12px"} fontWeight={"bold"}>
+                    {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                  </Box>
+                </VStack>
+              </CustomOverlayMap>
+            );
+          })}
         {zoomLevel >= 6 && zoomLevel <= 9 && mapInstance && renderPolygons(mapInstance)}
         {zoomLevel >= 6 &&
           zoomLevel <= 9 &&
-          data?.map(({ lat, lng, city, avg }: any) => (
-            <CustomOverlayMap key={`gu-${city}`} position={{ lat, lng }}>
-              <VStack
-                w={"85px"}
-                h={"53px"}
-                style={{
-                  backgroundImage: "url('/images/local_up2.png')",
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                }}
-                textAlign={"center"}
-                color={"white"}
-                lineHeight={1.2}
-                justifyContent={"center"}
-                spacing={0}
-              >
-                <Box fontSize={"11px"}>{city}</Box>
-                <Box fontSize={"12px"} fontWeight={"bold"}>
-                  {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
-                </Box>
-              </VStack>
-            </CustomOverlayMap>
-          ))}
+          data?.map(({ lat, lng, city, avg }: any) => {
+            const level = getDongGuLevel(avg); // avg 기준 단계 계산
+            const backgroundColor = getDongGuBackgroundColor(level); // 단계별 배경색 결정
+            return (
+              <CustomOverlayMap key={`gu-${city}`} position={{ lat, lng }}>
+                <VStack
+                  w={"85px"}
+                  h={"53px"}
+                  backgroundColor={backgroundColor} // 단계별 배경색 적용
+                  borderRadius={"24px"}
+                  boxShadow={"0 2px 4px rgba(0, 0, 0, 0.25)"}
+                  textAlign={"center"}
+                  color={"white"}
+                  lineHeight={1.2}
+                  justifyContent={"center"}
+                  spacing={0}
+                >
+                  <Box fontSize={"11px"}>{city}</Box>
+                  <Box fontSize={"12px"} fontWeight={"bold"}>
+                    {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                  </Box>
+                </VStack>
+              </CustomOverlayMap>
+            );
+          })}
 
         {zoomLevel >= 10 &&
           data?.map(({ lat, lng, city, avg }: any) => (
@@ -764,11 +844,9 @@ export default function MapComponent() {
               <VStack
                 w={"85px"}
                 h={"53px"}
-                style={{
-                  backgroundImage: "url('/images/local_up2.png')",
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                }}
+                backgroundColor={"#F37021"}
+                borderRadius={"24px"}
+                boxShadow={"0 2px 4px rgba(0, 0, 0, 0.25)"}
                 textAlign={"center"}
                 color={"white"}
                 lineHeight={1.2}
@@ -797,10 +875,22 @@ export default function MapComponent() {
 
       {/* 줌 컨트롤 버튼 */}
       <VStack position="absolute" bottom="50px" right="10px" zIndex={10} spacing={1}>
-        <Button onClick={handleZoomIn} bg="white" color="black" size="sm" w={8}>
+        <Button
+          onClick={handleZoomIn}
+          bg={"whiteAlpha.900"}
+          color={"blackAlpha.900"}
+          size="sm"
+          w={8}
+        >
           +
         </Button>
-        <Button onClick={handleZoomOut} bg="white" color="black" size="sm" w={8}>
+        <Button
+          onClick={handleZoomOut}
+          bg={"whiteAlpha.900"}
+          color={"blackAlpha.900"}
+          size="sm"
+          w={8}
+        >
           -
         </Button>
       </VStack>
@@ -821,49 +911,51 @@ export default function MapComponent() {
       </Box>
 
       {/* 검색 박스 */}
-      <Box
-        position={"absolute"}
-        left={"10px"}
-        top={"10px"}
-        minW={"358px"}
-        p={"10px"}
-        bg={backgroundColor}
-        borderRadius={24}
-        zIndex={1}
-        boxShadow={"0px 2px 4px rgba(0,0,0,0.25)"}
-      >
-        <InputGroup>
-          <Input
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="아파트, 지역 검색"
-            borderRadius={24}
-            borderColor={"#F37021"}
-            focusBorderColor="#FF9C60"
-            _focus={{
-              borderWidth: "1px",
-              borderColor: "#FF9C60",
-              boxShadow: "none",
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleSearch(); // 엔터 키를 누르면 handleSearch 호출
-              }
-            }}
-          />
-          <InputRightAddon
-            bg={"#F37021"}
-            borderTopEndRadius={24}
-            borderBottomEndRadius={24}
-            borderColor={"#F37021"}
-            px={3}
-            onClick={handleSearch}
-            cursor={"pointer"}
-          >
-            <FaSearch size={16} color="#FFFFFF" />
-          </InputRightAddon>
-        </InputGroup>
-      </Box>
+      {hideSearchBox && (
+        <Box
+          position={"absolute"}
+          left={"10px"}
+          top={"10px"}
+          minW={"358px"}
+          p={"10px"}
+          bg={backgroundColor}
+          borderRadius={24}
+          zIndex={1}
+          boxShadow={"0px 2px 4px rgba(0,0,0,0.25)"}
+        >
+          <InputGroup>
+            <Input
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="아파트, 지역 검색"
+              borderRadius={24}
+              borderColor={"#F37021"}
+              focusBorderColor="#FF9C60"
+              _focus={{
+                borderWidth: "1px",
+                borderColor: "#FF9C60",
+                boxShadow: "none",
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch(); // 엔터 키를 누르면 handleSearch 호출
+                }
+              }}
+            />
+            <InputRightAddon
+              bg={"#F37021"}
+              borderTopEndRadius={24}
+              borderBottomEndRadius={24}
+              borderColor={"#F37021"}
+              px={3}
+              onClick={handleSearch}
+              cursor={"pointer"}
+            >
+              <FaSearch size={16} color="#FFFFFF" />
+            </InputRightAddon>
+          </InputGroup>
+        </Box>
+      )}
     </div>
   );
 }

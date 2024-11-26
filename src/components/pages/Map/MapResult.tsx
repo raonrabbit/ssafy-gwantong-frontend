@@ -25,6 +25,7 @@ import TradeList from "./TradeList";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAptDetailById } from "../../../api/apt";
+import PyeongChart from "./PyeongChart";
 
 interface MapResultProps {
   apartmentId: string;
@@ -43,6 +44,7 @@ interface GraphData {
   yearMonth: string; // 연월 정보 (예: "21.12")
   averagePrice: number; // 평균 가격
   isMaxMinPrice: string; // "최고" 또는 "최소" (선택적 필드)
+  tradeCount: number;
 }
 
 // 아파트 상세 정보 인터페이스
@@ -54,19 +56,23 @@ interface ApartmentDetail {
   threeYearAveragePrice: number; // 3년 평균 가격
   oneMonthAveragePrice: number; // 실거래 기준 1개월 평균 가격
   graphData: GraphData[]; // 연월별 평균 가격 데이터
+  pyungGraphData: GraphData[]; // 연월별 평균 평당 가격 데이터
   tradeDetails: TradeDetail[]; // 거래 내역 데이터
   aiPredictedPrice: number; // AI 예측 가격
   aiPriceChangePercent: number; // AI 예측 가격 변동률
   monthComparisonPrice: number; // 1개월 전 가격
   monthComparisonPercent: number; // 1개월 전 가격 변동률
+  lat: number;
+  lng: number;
 }
 
-function formatPriceToKorean(price?: number): string {
-  if (!price) return "데이터 없음"; // price가 없을 경우 처리
-  const billion = Math.floor(price / 10000); // 억 단위
-  const thousand = Math.round(price % 10000); // 나머지 천 단위
+const formatPriceToKorean = (price: number): string => {
+  const billion = Math.floor(price / 10000);
+  const thousand = Math.round(price % 10000);
+  if (billion === 0) return `${thousand}만`;
+  if (thousand === 0) return `${billion}억`;
   return `${billion}억 ${thousand}`;
-}
+};
 
 export default function MapResult({ apartmentId }: MapResultProps) {
   const {
@@ -81,6 +87,10 @@ export default function MapResult({ apartmentId }: MapResultProps) {
     enabled: !!apartmentId,
   });
   const [searchValue, setSearchValue] = useState(apartment?.aptName || "");
+  const [selectedSize, setSelectedSize] = useState<number | null>(null); // 선택한 평수 상태 추가
+  const [isFixed, setIsFixed] = useState(false); // Fixed 상태 추가
+  const sectionRef = useRef<HTMLDivElement>(null); // 관찰 대상 ref
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // 스크롤 컨테이너 ref
   const roadviewRef = useRef<HTMLDivElement>(null);
   const [isOn, setIsOn] = useState(true);
   const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
@@ -95,8 +105,23 @@ export default function MapResult({ apartmentId }: MapResultProps) {
   const borderColor = useColorModeValue("#FF9C60", "#4A5568");
   const tradeColor = useColorModeValue("white", "gray.800");
   const tradeTextColor = useColorModeValue("#1F1F1F", "#FAFAFA");
+  const searchButtonColor = useColorModeValue("#FFFFFF", "gray.700");
 
   const apartmentDetailColor1 = useColorModeValue("gray.200", "gray.600");
+
+  // 매매가 기준, 평당 기준 토글
+  const [activeChart, setActiveChart] = useState<"trade" | "pyeong">("trade");
+  const activeTabColor = "3px solid #F37021";
+  const inactiveTabColor = "1px solid #cccccc";
+
+  const handleSizeSelect = (size: number | null) => {
+    setSelectedSize(size);
+  };
+
+  // 평수별 필터링된 거래 내역
+  const filteredTradeDetails = apartment?.tradeDetails.filter((trade) =>
+    selectedSize ? trade.size === selectedSize : true
+  );
 
   const handleToggle = () => {
     setIsOn(!isOn);
@@ -113,6 +138,28 @@ export default function MapResult({ apartmentId }: MapResultProps) {
     if (apartment?.aptName) navigate(`/map/search?query=${encodeURIComponent(apartment.aptName)}`);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sectionRef.current && scrollContainerRef.current) {
+        const { top } = sectionRef.current.getBoundingClientRect();
+        const containerTop = scrollContainerRef.current.getBoundingClientRect().top;
+        setIsFixed(top - containerTop <= 88 + 60); // 88px 헤더 높이와 비교
+      }
+    };
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleScroll);
+      handleScroll(); // 초기 상태 설정
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
   // Navigate to notfound if necessary
   useEffect(() => {
     if (!isLoading && (isError || !apartment)) {
@@ -123,12 +170,12 @@ export default function MapResult({ apartmentId }: MapResultProps) {
   // Kakao Maps 로드뷰 설정
   useEffect(() => {
     if (!apartment || !roadviewRef.current) return;
-
+    setSearchValue(apartment.aptName);
     const roadview = new window.kakao.maps.Roadview(roadviewRef.current);
     const roadviewClient = new window.kakao.maps.RoadviewClient();
 
-    const lat = 37.5236021633556; // 예시 좌표
-    const lng = 127.057196117679;
+    const lat = apartment.lat;
+    const lng = apartment.lng;
     const markerPosition = new window.kakao.maps.LatLng(lat, lng);
     setTimeout(
       () =>
@@ -149,14 +196,15 @@ export default function MapResult({ apartmentId }: MapResultProps) {
   }, [apartment]); // apartment가 변경될 때만 로드뷰 로직 실행
 
   // 평수 계산 및 그룹화
-  const groupedSizes = Array.from(
-    new Set(apartment?.tradeDetails.map((trade) => Math.round(trade.size / 3.3)))
-  ).sort((a, b) => a - b); // 중복 제거 및 정렬
+  const groupedSizes = Array.from(new Set(apartment?.tradeDetails.map((trade) => trade.size))).sort(
+    (a, b) => a - b
+  ); // 중복 제거 및 정렬
 
   if (!apartment) return null; // navigate 후 렌더링 방지
 
   return (
     <Box
+      ref={scrollContainerRef}
       position={"absolute"}
       left={"0"}
       top={"0"}
@@ -198,13 +246,25 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           onClick={handleSearch}
           cursor={"pointer"}
         >
-          <FaSearch size={16} color="#FFFFFF" />
+          <FaSearch size={16} color={searchButtonColor} />
         </InputRightAddon>
       </InputGroup>
 
+      {/* 헤더 섹션 */}
+      {/* <Box
+        ref={sectionRef}
+        position={isFixed ? "fixed" : "relative"} // Fixed 상태
+        top={isFixed ? "88px" : "0"} // 헤더 높이
+        left="0"
+        w="358px"
+        zIndex={999}
+        bg={accentColor}
+        boxShadow={isFixed ? "md" : "none"} // 스크롤 시 그림자 추가
+        transition="box-shadow 0.3s ease"
+      > */}
       {/* 아파트 상세 정보 */}
       <HStack h={"52px"} bg={accentColor} justifyContent={"space-between"}>
-        <HStack w={"52px"} justifyContent={"center"} onClick={handleBackButton}>
+        <HStack w={"52px"} justifyContent={"center"} onClick={handleBackButton} cursor={"pointer"}>
           <MdArrowBack size={24} color="white" />
         </HStack>
         <Box>
@@ -227,7 +287,6 @@ export default function MapResult({ apartmentId }: MapResultProps) {
             colorScheme={"customOrange"}
             as={Button}
             rightIcon={<IoIosArrowDown size={24} color="white" />}
-            bg="#F37021"
             color="white"
             borderRadius={0}
             minW={"119px"}
@@ -255,11 +314,20 @@ export default function MapResult({ apartmentId }: MapResultProps) {
             minW={"119px"}
             borderRight={`1px solid ${borderColor}`}
           >
-            {groupedSizes.length > 0 ? `${groupedSizes[0]}평` : "평수 선택"}
+            {selectedSize
+              ? `${selectedSize}평`
+              : groupedSizes.length > 0
+              ? `${groupedSizes[0]}평`
+              : "평수 선택"}
           </MenuButton>
           <MenuList minWidth="110px" bg={menuBgColor} color="white" border="none">
             {groupedSizes.map((size) => (
-              <MenuItem key={size} bg={accentColor} _hover={{ bg: borderColor }}>
+              <MenuItem
+                key={size}
+                bg={accentColor}
+                _hover={{ bg: borderColor }}
+                onClick={() => handleSizeSelect(size)}
+              >
                 {size}평
               </MenuItem>
             ))}
@@ -269,6 +337,9 @@ export default function MapResult({ apartmentId }: MapResultProps) {
           <FaRegHeart size={24} color="white" cursor={"pointer"} />
         </HStack>
       </HStack>
+      {/* </Box> */}
+
+      {/* 토글 */}
       <VStack py={5} mt={"5px"} bg={tradeColor} gap={0}>
         <HStack px={5} justifyContent={"space-between"} w={"100%"}>
           <Flex
@@ -320,11 +391,17 @@ export default function MapResult({ apartmentId }: MapResultProps) {
               paddingLeft={1}
               paddingRight={0}
             >
-              {groupedSizes.length > 0 ? `${groupedSizes[0]}평` : "평수 선택"}
+              {selectedSize
+                ? `${selectedSize}평`
+                : groupedSizes.length > 0
+                ? `${groupedSizes[0]}평`
+                : "평수 선택"}
             </MenuButton>
             <MenuList minW={"45px"} fontSize={"12px"}>
               {groupedSizes.map((size) => (
-                <MenuItem key={size}>{size}평</MenuItem>
+                <MenuItem key={size} onClick={() => handleSizeSelect(size)}>
+                  {size}평
+                </MenuItem>
               ))}
             </MenuList>
           </Menu>
@@ -347,7 +424,7 @@ export default function MapResult({ apartmentId }: MapResultProps) {
               최근 실거래 기준 1개월 평균
             </Text>
             <Text color={"#F37021"} fontSize={"18px"} fontWeight={"bold"} lineHeight={"25px"}>
-              21억 2700
+              {formatPriceToKorean(apartment.oneMonthAveragePrice)}
             </Text>
           </VStack>
           <VStack justifyContent={"space-between"} lineHeight={"17px"} align={"end"}>
@@ -359,19 +436,27 @@ export default function MapResult({ apartmentId }: MapResultProps) {
             </Text>
           </VStack>
         </HStack>
-        <Grid mt={4} templateColumns={"repeat(3, 1fr)"} minW={"358px"}>
-          <Box textAlign={"center"} borderBottom={`3px solid ${tradeTextColor}`} cursor={"pointer"}>
-            <Text lineHeight={"46px"}>최근 3년</Text>
+        <Grid mt={4} templateColumns={"repeat(2, 1fr)"} minW={"358px"}>
+          <Box
+            textAlign={"center"}
+            borderBottom={activeChart === "trade" ? activeTabColor : inactiveTabColor}
+            cursor={"pointer"}
+            onClick={() => setActiveChart("trade")}
+          >
+            <Text lineHeight={"46px"}>매매가 기준</Text>
           </Box>
-          <Box textAlign={"center"} borderBottom={`1px solid ${tradeTextColor}`} cursor={"pointer"}>
-            <Text lineHeight={"46px"}>전체 기간</Text>
-          </Box>
-          <Box textAlign={"center"} borderBottom={`1px solid ${tradeTextColor}`} cursor={"pointer"}>
-            <Text lineHeight={"46px"}>매매/전세</Text>
+          <Box
+            textAlign={"center"}
+            borderBottom={activeChart === "pyeong" ? activeTabColor : inactiveTabColor}
+            cursor={"pointer"}
+            onClick={() => setActiveChart("pyeong")}
+          >
+            <Text lineHeight={"46px"}>평당 기준</Text>
           </Box>
         </Grid>
-        <TradeChart />
-        <TradeList tradeDetails={apartment?.tradeDetails || []} />
+        {activeChart === "trade" && <TradeChart graphData={apartment.graphData} />}
+        {activeChart === "pyeong" && <PyeongChart graphData={apartment.pyungGraphData} />}
+        <TradeList tradeDetails={filteredTradeDetails || []} />
       </VStack>
     </Box>
   );

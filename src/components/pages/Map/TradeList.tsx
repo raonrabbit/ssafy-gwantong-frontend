@@ -1,15 +1,4 @@
-import {
-  Box,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
+import { Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, VStack } from "@chakra-ui/react";
 import React from "react";
 
 // 단일 거래 정보 인터페이스
@@ -53,7 +42,7 @@ const TradeList: React.FC<TradeListProps> = ({ tradeDetails }) => {
           {tradeDetails.map((trade, index) => (
             <Tr key={index}>
               <Td>{formatDate(trade.date) || "날짜 없음"}</Td>
-              <Td>{`${Math.round(trade.size)}㎡ / ${Math.round(trade.size / 3.3)}평`}</Td>
+              <Td>{`${trade.size}평`}</Td>
               <Td colSpan={2}>
                 <VStack display="flex" align={"end"}>
                   <Text fontWeight={"bold"}>{formatPriceToKorean(trade.price)}</Text>

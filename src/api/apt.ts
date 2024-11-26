@@ -64,6 +64,7 @@ interface GraphData {
   yearMonth: string; // 연월 정보 (예: "21.12")
   averagePrice: number; // 평균 가격
   isMaxMinPrice: string; // "최고" 또는 "최소" (선택적 필드)
+  tradeCount: number;
 }
 
 // 아파트 상세 정보 인터페이스
@@ -75,11 +76,14 @@ interface ApartmentDetail {
   threeYearAveragePrice: number; // 3년 평균 가격
   oneMonthAveragePrice: number; // 실거래 기준 1개월 평균 가격
   graphData: GraphData[]; // 연월별 평균 가격 데이터
+  pyungGraphData: GraphData[]; // 연월별 평균 평당 가격 데이터
   tradeDetails: TradeDetail[]; // 거래 내역 데이터
   aiPredictedPrice: number; // AI 예측 가격
   aiPriceChangePercent: number; // AI 예측 가격 변동률
   monthComparisonPrice: number; // 1개월 전 가격
   monthComparisonPercent: number; // 1개월 전 가격 변동률
+  lat: number;
+  lng: number;
 }
 
 // API 요청 함수

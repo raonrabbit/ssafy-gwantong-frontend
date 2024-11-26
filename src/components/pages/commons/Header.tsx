@@ -105,11 +105,6 @@ export default function Header() {
                   로그인
                 </Button>
               </Link>
-              {/* <Link to={"/join"}>
-                <Button colorScheme={"customOrange"} variant={"primary"} borderRadius={"12px"}>
-                  회원가입
-                </Button>
-              </Link> */}
             </>
           )}
         </HStack>

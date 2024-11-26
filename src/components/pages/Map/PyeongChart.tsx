@@ -70,7 +70,7 @@ const processGraphData = (
   return { results, dynamicTicks };
 };
 
-const TradeChart: React.FC<{ graphData: GraphData[] }> = ({ graphData }) => {
+const PyeongChart: React.FC<{ graphData: GraphData[] }> = ({ graphData }) => {
   const bgColor = useColorModeValue("white", "gray.800");
   // Process trade details
   const { results: processedData, dynamicTicks } = processGraphData(graphData);
@@ -90,7 +90,7 @@ const TradeChart: React.FC<{ graphData: GraphData[] }> = ({ graphData }) => {
         style={{ backgroundColor: bgColor }}
         data={lineChartData}
         options={{
-          title: "시세 추이",
+          title: "평당 시세 추이",
           hAxis: { title: "Date", format: "yyyy.MM", slantedText: true },
           vAxis: {
             title: "가격 (억 원)",
@@ -128,4 +128,4 @@ const TradeChart: React.FC<{ graphData: GraphData[] }> = ({ graphData }) => {
   );
 };
 
-export default TradeChart;
+export default PyeongChart;

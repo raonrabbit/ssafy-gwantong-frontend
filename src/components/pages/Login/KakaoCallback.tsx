@@ -46,12 +46,15 @@ export default function KakaoCallback() {
         }
 
         // 2. 토큰으로 사용자 정보 요청
-        const userResponse: any = await axios.get("http://localhost:8080/api/v1/user/profile", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          withCredentials: true,
-        });
+        const userResponse: any = await axios.get(
+          `${process.env.REACT_APP_SPRING_REST_API_URI}user/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          }
+        );
         const { email, nickname, profileImageUrl } = userResponse.data;
 
         // 3. Redux 상태 업데이트

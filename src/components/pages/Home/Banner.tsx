@@ -85,11 +85,12 @@ export default function Banner() {
           color={"#1F1F1F"}
         >
           <Text fontSize={{ sm: "18px", md: "24px" }} fontWeight={"700"} mt={{ sm: 16, md: 20 }}>
-            거래 가능한 부동산 건 수
+            거래된 부동산 건 수
           </Text>
           <Text fontSize={{ sm: "20px", md: "32px" }} fontWeight={"700"} mt={4}>
-            2,100,000 건
+            892,700 건
           </Text>
+          <Text fontSize={12}>최근 3년 기준</Text>
         </Box>
         <VStack
           w={{ sm: "200px", md: "272px" }}
@@ -104,11 +105,11 @@ export default function Banner() {
               우리 서비스는?
             </Text>
           </Box>
-          <Text fontSize={16} color={serviceContent}>
-            가을의 낙엽이 떨어지듯 우리 회사 주식도 배앰.. 한번만 살려주세요
+          <Text fontSize={16} color={serviceContent} textAlign={"center"}>
+            부동산 거래 데이터를 분석해 시세를 한눈에! AI 예측으로 더 스마트한 선택
           </Text>
           <Text fontSize={12} color={serviceTagContent}>
-            #부동산은 이집어때 #가을 좋아
+            #부동산시세 #AI분석 #데이터기반 #이집어때
           </Text>
         </VStack>
         <VStack

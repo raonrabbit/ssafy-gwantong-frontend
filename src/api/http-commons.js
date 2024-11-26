@@ -2,10 +2,7 @@ import axios from "axios";
 
 const localAxios = () => {
   const instance = axios.create({
-    baseURL:
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:8080/api/v1/"
-        : "http://api.ezip.world/api/v1/",
+    baseURL: process.env.REACT_APP_SPRING_REST_API_URI,
     withCredentials: true,
     headers: {
       "Content-Type": "application/json;charset=utf-8",
