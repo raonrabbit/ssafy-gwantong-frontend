@@ -6,6 +6,8 @@ const localAxios = () => {
     withCredentials: true,
     headers: {
       "Content-Type": "application/json;charset=utf-8",
+      "Access-Control-Allow-Origin": "*",
+      crossDomain: true,
     },
   });
   return instance;
