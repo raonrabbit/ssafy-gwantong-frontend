@@ -26,6 +26,13 @@ const cleanHtml = (text: string) => {
   return decodedText;
 };
 
+type NewsItem = {
+  title: string;
+  originallink: string;
+  description: string;
+  pubDate: string;
+};
+
 const NewsList: React.FC = () => {
   const [news, setNews] = useState<NewsData[]>([]);
   const myAxios = localAxios();
@@ -34,16 +41,15 @@ const NewsList: React.FC = () => {
     const fetchNews = async () => {
       try {
         const response = await myAxios.get("/news");
-
-        const items = Array.isArray(response.data)
-          ? response.data.map((item: any) => ({
-              title: cleanHtml(item?.title || "제목 없음"), // HTML 정리
+        const data = response.data as { news: NewsItem[] }; // 강제 타입 지정
+        const items = Array.isArray(data.news)
+          ? data.news.map((item) => ({
+              title: cleanHtml(item?.title || "제목 없음"),
               originallink: item?.originallink || "#",
-              description: cleanHtml(item?.description || "설명이 없습니다."), // HTML 정리
+              description: cleanHtml(item?.description || "설명이 없습니다."),
               pubDate: item?.pubDate ? new Date(item.pubDate).toLocaleDateString() : "날짜 없음",
             }))
           : [];
-        console.log("Fetched news:", items);
         setNews(items);
       } catch (error) {
         console.error("Error fetching news:", error);
@@ -83,7 +89,7 @@ const NewsList: React.FC = () => {
 
         {/* 우측: 제목 리스트 */}
         <VStack align="stretch" spacing={3} justifyContent="space-between">
-          {news.slice(4).map((newsItem, index) => (
+          {news.slice(4, 10).map((newsItem, index) => (
             <NewsTitleCard
               key={index}
               title={newsItem.title}
