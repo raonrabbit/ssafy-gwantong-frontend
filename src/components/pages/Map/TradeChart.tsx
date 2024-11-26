@@ -17,7 +17,6 @@ const processGraphData = (
   const months: string[] = [];
   const results: GraphData[] = [];
   let lastPrice = 0;
-
   // Generate list of all months between startDate and endDate
   for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
     months.push(

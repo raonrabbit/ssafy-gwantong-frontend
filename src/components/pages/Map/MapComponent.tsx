@@ -459,7 +459,7 @@ export default function MapComponent() {
         setRange(calculatedRange);
       }
       // 구 동 별 바운드 4단계
-      const maxDongGuAvg = data.map((item: any) => item.avg).filter(Boolean);
+      const maxDongGuAvg = data.map((item: any) => item.latestAvg).filter(Boolean);
       if (maxDongGuAvg.length > 0) {
         const min = Math.min(...maxDongGuAvg);
         const max = Math.max(...maxDongGuAvg);
@@ -476,11 +476,11 @@ export default function MapComponent() {
   const getDongGuBackgroundColor = (level: number): string => {
     switch (level) {
       case 1:
-        return "#FAC19E";
-      case 2:
         return "#FFAA77";
-      case 3:
-        return "#FF9C60";
+      case 2:
+        return "#FF8E49";
+      // case 3:
+      //   return "#FF9C60";
       default:
         return "#F37021";
     }
@@ -489,14 +489,14 @@ export default function MapComponent() {
   const getLevel = (value: number) => {
     if (value <= minValue + range) return 1;
     if (value <= minValue + range * 2) return 2;
-    if (value <= minValue + range * 3) return 3;
+    // if (value <= minValue + range * 3) return 3;
     return 4;
   };
 
   const getDongGuLevel = (value: number) => {
     if (value <= dongGuMinValue + dongGuRange) return 1;
     if (value <= dongGuMinValue + dongGuRange * 2) return 2;
-    if (value <= minValue + dongGuRange * 3) return 3;
+    // if (value <= minValue + dongGuRange * 3) return 3;
     return 4;
   };
 
@@ -784,8 +784,8 @@ export default function MapComponent() {
           })}
         {zoomLevel >= 4 &&
           zoomLevel <= 5 &&
-          data?.map(({ lat, lng, city, avg }: any) => {
-            const level = getDongGuLevel(avg); // avg 기준 단계 계산
+          data?.map(({ lat, lng, city, latestAvg, previousAvg, changePercentage }: any) => {
+            const level = getDongGuLevel(latestAvg); // avg 기준 단계 계산
             const backgroundColor = getDongGuBackgroundColor(level); // 단계별 배경색 결정
             return (
               <CustomOverlayMap key={`dong-${city}`} position={{ lat, lng }}>
@@ -803,18 +803,60 @@ export default function MapComponent() {
                 >
                   <Box fontSize={"11px"}>{city}</Box>
                   <Box fontSize={"12px"} fontWeight={"bold"}>
-                    {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                    {latestAvg
+                      ? `${((latestAvg * 25) / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
+                      : "정보없음"}
                   </Box>
                 </VStack>
+
+                <HStack
+                  pos={"absolute"}
+                  top={"-26px"}
+                  left={"50%"}
+                  transform={"translateX(-50%)"}
+                  spacing={"4px"}
+                  bg={"#f2f2f2"}
+                  borderRadius={"8px"}
+                  px={"4px"}
+                  py={"4px"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                >
+                  {changePercentage > 0 && (
+                    <>
+                      <FaFire color="#FF4500" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#FF4500"}>
+                        +{changePercentage.toFixed(1)}%
+                      </Box>
+                    </>
+                  )}
+                  {changePercentage < 0 && (
+                    <>
+                      <FaSnowflake color="#339FFF" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#339FFF"}>
+                        {changePercentage.toFixed(1)}%
+                      </Box>
+                    </>
+                  )}
+                  {changePercentage === 0 && (
+                    <>
+                      <GoDash color="#808080" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#808080"}>
+                        0.0%
+                      </Box>
+                    </>
+                  )}
+                </HStack>
               </CustomOverlayMap>
             );
           })}
         {zoomLevel >= 6 && zoomLevel <= 9 && mapInstance && renderPolygons(mapInstance)}
         {zoomLevel >= 6 &&
           zoomLevel <= 9 &&
-          data?.map(({ lat, lng, city, avg }: any) => {
-            const level = getDongGuLevel(avg); // avg 기준 단계 계산
-            const backgroundColor = getDongGuBackgroundColor(level); // 단계별 배경색 결정
+          data?.map(({ lat, lng, city, latestAvg, previousAvg, changePercentage }: any) => {
+            const level = getDongGuLevel(latestAvg);
+            const backgroundColor = getDongGuBackgroundColor(level);
             return (
               <CustomOverlayMap key={`gu-${city}`} position={{ lat, lng }}>
                 <VStack
@@ -831,9 +873,51 @@ export default function MapComponent() {
                 >
                   <Box fontSize={"11px"}>{city}</Box>
                   <Box fontSize={"12px"} fontWeight={"bold"}>
-                    {avg ? `${(avg / 10000).toFixed(avg >= 100000 ? 0 : 1)}억` : "N/A"}
+                    {latestAvg
+                      ? `${((latestAvg * 25) / 10000).toFixed(latestAvg >= 100000 ? 0 : 1)}억`
+                      : "N/A"}
                   </Box>
                 </VStack>
+
+                <HStack
+                  pos={"absolute"}
+                  top={"-26px"}
+                  left={"50%"}
+                  transform={"translateX(-50%)"}
+                  spacing={"4px"}
+                  bg={"#f2f2f2"}
+                  borderRadius={"8px"}
+                  px={"4px"}
+                  py={"4px"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  boxShadow={"0 2px 4px rgba(0, 0, 0, 0.2)"}
+                >
+                  {changePercentage > 0 && (
+                    <>
+                      <FaFire color="#FF4500" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#FF4500"}>
+                        +{changePercentage.toFixed(1)}%
+                      </Box>
+                    </>
+                  )}
+                  {changePercentage < 0 && (
+                    <>
+                      <FaSnowflake color="#339FFF" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#339FFF"}>
+                        {changePercentage.toFixed(1)}%
+                      </Box>
+                    </>
+                  )}
+                  {changePercentage === 0 && (
+                    <>
+                      <GoDash color="#808080" />
+                      <Box fontSize={"12px"} fontWeight={"bold"} color={"#808080"}>
+                        0.0%
+                      </Box>
+                    </>
+                  )}
+                </HStack>
               </CustomOverlayMap>
             );
           })}

@@ -3,13 +3,14 @@ import { FaComment } from "react-icons/fa";
 
 export default function SocialLogin() {
   const KAKAO_CLIENT_ID = process.env.REACT_APP_KAKAO_CLIENT_ID;
-  const KAKAO_REDIRECT_URI = process.env.REACT_APP_KAKAO_REDIRECT_URI;
+  const ORIGIN_URI = process.env.REACT_APP_ORIGIN_URI;
+  console.log(process.env);
   return (
     <Box>
       <VStack>
         <Button
           as={"a"}
-          href={`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}`}
+          href={`https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_CLIENT_ID}&redirect_uri=${ORIGIN_URI}/auth/redirect`}
           width={"100%"}
           leftIcon={<FaComment />}
           colorScheme={"yellow"}

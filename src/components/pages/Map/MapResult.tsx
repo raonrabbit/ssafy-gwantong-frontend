@@ -138,28 +138,6 @@ export default function MapResult({ apartmentId }: MapResultProps) {
     if (apartment?.aptName) navigate(`/map/search?query=${encodeURIComponent(apartment.aptName)}`);
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (sectionRef.current && scrollContainerRef.current) {
-        const { top } = sectionRef.current.getBoundingClientRect();
-        const containerTop = scrollContainerRef.current.getBoundingClientRect().top;
-        setIsFixed(top - containerTop <= 88 + 60); // 88px 헤더 높이와 비교
-      }
-    };
-
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll);
-      handleScroll(); // 초기 상태 설정
-    }
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, []);
-
   // Navigate to notfound if necessary
   useEffect(() => {
     if (!isLoading && (isError || !apartment)) {
